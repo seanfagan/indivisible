@@ -19,6 +19,7 @@ bool is_invalid_char(char ch)
 	return not std::isalnum(static_cast<unsigned char>(ch));
 }
 
+
 bool is_valid_notation(std::string selection)
 {
 	std::regex rgx("^[A-Z]\d$");
@@ -27,16 +28,16 @@ bool is_valid_notation(std::string selection)
 } 
 
 
-std::vector<std::string> parse_selection(std::string input)
+std::vector<Coordinate> parse_selection(std::string input)
 {
 	/**
-		Parses the user's input for selecting tiles. Does some cleaning and validating.
+		Parses the user's input for selecting tiles. Does some cleaning and validation.
 
 		@param input The user's input to parse.
 		@return A vector of all the user's tile selections.
 	*/
-	std::stringstream ss(input); // convert input to stringstream
-	std::vector<std::string> result;
+	std::stringstream ss(input);
+	std::vector<Coordinate> result;
 	std::regex rgx("[A-Z]\\d"); // regex of valid notation
 
 	while (ss.good())
@@ -52,10 +53,12 @@ std::vector<std::string> parse_selection(std::string input)
 		std::transform(substr.begin(), substr.end(), substr.begin(), ::toupper);
 
 		// run against regex
-		if (std::regex_match(substr, rgx)) {
-			result.push_back(substr);
-		} else {
+		if (!std::regex_match(substr, rgx)) {
 			std::cout << "I don't understand '" << substr << "'. Selections must be '[Letter][Number]', like 'A1'." << std::endl;
+		} else {
+			// substring is valid! (and so are you!)
+			Coordinate coor = Coordinate(substr);
+			result.push_back(coor);
 		};
 	}
 
@@ -82,8 +85,7 @@ struct Coordinate {
 	static std::tuple<int, int> to_cartesian(std::string notation)
 	{
 		/** Convert coordinates from board notation ("A1") to cartesian (0, 0). */
-
-		// do math on the ascii values to get integer values
+		// do math on the ascii values
 		int a = notation[0] - 'A';
 		int b = notation[1] - '1';
 
@@ -93,10 +95,17 @@ struct Coordinate {
 	static std::string to_notation(int x, int y)
 	{
 		/** Convert coordinates from cartesian (0, 0) to board notation ("A1"). */
+		// do math on the ascii values
 		char a = 'A' + x;
 		char b = '1' + y;
 
 		return std::string{ a, b };
+	}
+
+	std::string Display()
+	{
+		/** Return a string that represents the coord. */
+		return to_notation(x, y);
 	}
 };
 
@@ -110,13 +119,14 @@ int main()
 	std::getline(std::cin, input);
 
 	// parse input into vector
-	std::vector<std::string> result = parse_selection(input);
+	std::vector<Coordinate> result = parse_selection(input);
 
 	// print vector
 	for (auto i : result)
 	{
-		std::cout << "|" << i << "|" << std::endl;
+		std::cout << i.Display() << "|";
 	}
+	std::cout << std::endl;
 
 	std::cout << "End" << std::endl;
 	std::cin.get();
