@@ -4,6 +4,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -60,6 +61,44 @@ std::vector<std::string> parse_selection(std::string input)
 
 	return result;
 }
+
+
+struct Coordinate {
+	int x, y;
+
+	Coordinate(int xx, int yy)
+	{
+		x = xx;
+		y = yy;
+	}
+
+	Coordinate(std::string notation)
+	{
+		std::tuple<int, int> xy = to_cartesian(notation);
+		x = std::get<0>(xy);
+		y = std::get<1>(xy);
+	}
+
+	static std::tuple<int, int> to_cartesian(std::string notation)
+	{
+		/** Convert coordinates from board notation ("A1") to cartesian (0, 0). */
+
+		// do math on the ascii values to get integer values
+		int a = notation[0] - 'A';
+		int b = notation[1] - '1';
+
+		return std::tuple<int, int>(a, b);
+	}
+
+	static std::string to_notation(int x, int y)
+	{
+		/** Convert coordinates from cartesian (0, 0) to board notation ("A1"). */
+		char a = 'A' + x;
+		char b = '1' + y;
+
+		return std::string{ a, b };
+	}
+};
 
 
 int main()
