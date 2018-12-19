@@ -64,14 +64,6 @@ bool is_invalid_char(char ch)
 }
 
 
-bool is_valid_notation(std::string selection)
-{
-	std::regex rgx("^[A-Z]\d$");
-
-	return std::regex_match(selection, rgx);
-} 
-
-
 std::vector<Coordinate> parse_selection(std::string input)
 {
 	/**
