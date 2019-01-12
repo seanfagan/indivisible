@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <iostream>
 #include <regex>
@@ -7,6 +8,64 @@
 #include <tuple>
 #include <vector>
 
+#define SIZE 5
+using intboard = std::array<std::array<int, SIZE>, SIZE>;
+using boolboard = std::array<std::array<bool, SIZE>, SIZE>;
+
+int dfs(intboard map, boolboard& visited, int row, int col, int depth) {
+	visited[row][col] = true;
+	depth++;
+
+	std::pair<int, int> neighbors[4] = {
+		{
+			row,
+			std::min(col + 1, SIZE - 1) // right
+		},
+		{
+			std::min(row + 1, SIZE - 1), // down
+			col
+		},
+		{
+			row,
+			std::max(col-1, 0) // left
+		},
+		{
+			std::max(row - 1, 0), // up
+			col
+		},
+	};
+
+	for (const auto& n : neighbors) {
+		if (!visited[n.first][n.second] && map[n.first][n.second] == map[row][col]) {
+			depth = dfs(map, visited, n.first, n.second, depth);
+		}
+	}
+
+	return depth;
+}
+
+int count_components(intboard map) {
+	boolboard visited = { 0 };
+	int components = 0;
+	for (int row = 0; row < map.size(); row++) {
+		for (int col = 0; col < map.size(); col++) {
+			if (!visited[row][col]) {
+				int depth = dfs(map, visited, row, col, 0);
+				components++;
+				std::cout << "Component of color " << map[row][col] << " was depth " << depth << "!" << std::endl;
+			}  
+		}
+	}
+	return components;
+}
+
+intboard ARR = {{
+	{2, 2, 0, 1, 1},
+	{2, 2, 0, 0, 1},
+	{0, 2, 0, 0, 1},
+	{0, 1, 0, 0, 1},
+	{0, 1, 0, 0, 0},
+}};
 
 struct Coordinate {
 	int x, y;
@@ -106,6 +165,10 @@ int main()
 {
 	std::cout << "Hi world." << std::endl;
 
+	int components = count_components(ARR);
+	std::cout << "Components found: " << components << std::endl;
+
+	/*
 	// get input
 	std::string input;
 	std::getline(std::cin, input);
@@ -119,6 +182,7 @@ int main()
 		std::cout << i.Display() << "|";
 	}
 	std::cout << std::endl;
+	*/
 
 	std::cout << "End" << std::endl;
 	std::cin.get();
