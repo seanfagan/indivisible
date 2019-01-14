@@ -12,63 +12,21 @@
 using intboard = std::array<std::array<int, SIZE>, SIZE>;
 using boolboard = std::array<std::array<bool, SIZE>, SIZE>;
 
-int dfs(intboard map, boolboard& visited, int row, int col, int depth) {
-	visited[row][col] = true;
-	depth++;
-
-	std::pair<int, int> neighbors[4] = {
-		{
-			row,
-			std::min(col + 1, SIZE - 1) // right
-		},
-		{
-			std::min(row + 1, SIZE - 1), // down
-			col
-		},
-		{
-			row,
-			std::max(col-1, 0) // left
-		},
-		{
-			std::max(row - 1, 0), // up
-			col
-		},
-	};
-
-	for (const auto& n : neighbors) {
-		if (!visited[n.first][n.second] && map[n.first][n.second] == map[row][col]) {
-			depth = dfs(map, visited, n.first, n.second, depth);
-		}
-	}
-
-	return depth;
-}
-
-int count_components(intboard map) {
-	boolboard visited = { 0 };
-	int components = 0;
-	for (int row = 0; row < map.size(); row++) {
-		for (int col = 0; col < map.size(); col++) {
-			if (!visited[row][col]) {
-				int depth = dfs(map, visited, row, col, 0);
-				components++;
-				std::cout << "Component of color " << map[row][col] << " was depth " << depth << "!" << std::endl;
-			}  
-		}
-	}
-	return components;
-}
-
-intboard ARR = {{
+intboard ARR = { {
 	{2, 2, 0, 1, 1},
 	{2, 2, 0, 0, 1},
 	{0, 2, 0, 0, 1},
 	{0, 1, 0, 0, 1},
 	{0, 1, 0, 0, 0},
-}};
+} };
 
 struct Coordinate {
 	int x, y;
+
+	Coordinate() {
+		x = 0;
+		y = 0;
+	}
 
 	Coordinate(int xx, int yy)
 	{
@@ -110,6 +68,81 @@ struct Coordinate {
 	}
 };
 
+struct Component {
+	Coordinate root;
+	int size;
+	int group;
+
+	Component(Coordinate root, int size, int group)
+	{
+		root = root;
+		size = size;
+		group = group;
+	}
+};
+
+int dfs(const intboard& map, boolboard& visited, int row, int col, int size) {
+	/**
+		Performs a depth first search at row/column, recursively looking for neighbors with the same value.
+
+		@return The size of the component found.
+	*/
+	visited[row][col] = true;
+	size++;
+
+	std::pair<int, int> neighbors[4] = {
+		{
+			row,
+			std::min(col + 1, SIZE - 1) // right
+		},
+		{
+			std::min(row + 1, SIZE - 1), // down
+			col
+		},
+		{
+			row,
+			std::max(col-1, 0) // left
+		},
+		{
+			std::max(row - 1, 0), // up
+			col
+		},
+	};
+
+	for (const auto& n : neighbors) {
+		const int & nrow = n.first;
+		const int & ncol = n.second;
+
+		if (!visited[nrow][ncol] && map[nrow][ncol] == map[row][col]) {
+			size = dfs(map, visited, nrow, ncol, size);
+		}
+	}
+
+	return size;
+}
+
+int count_components(intboard& map) {
+	boolboard visited = { 0 };
+	int components = 0;
+	for (int row = 0; row < SIZE; row++) {
+		for (int col = 0; col < SIZE; col++) {
+			if (!visited[row][col]) {
+				components++;
+				int depth = dfs(map, visited, row, col, 0);
+				const int & group = map[row][col];
+
+				std::cout << "Component of group " << map[row][col] << " was depth " << depth << "!" << std::endl;
+				if (group == 0 && depth < SIZE) {
+					std::cout << "Illegal: This selection would create an area too small to be selected." << std::endl;
+				}
+				else if (group != 0 && depth != SIZE) {
+					std::cout << "Illegal: Every selection must be " << SIZE << " tiles." << std::endl;
+				}
+			}  
+		}
+	}
+	return components;
+}
 
 bool is_invalid_char(char ch)
 {
@@ -121,7 +154,6 @@ bool is_invalid_char(char ch)
 	*/
 	return not std::isalnum(static_cast<unsigned char>(ch));
 }
-
 
 std::vector<Coordinate> parse_selection(std::string input)
 {
@@ -159,7 +191,6 @@ std::vector<Coordinate> parse_selection(std::string input)
 
 	return result;
 }
-
 
 int main()
 {
