@@ -41,10 +41,12 @@ struct Coordinate {
 		y = std::get<1>(xy);
 	}
 
+	int & col() { return x; }
+	int & row() { return y; }
+
 	static std::tuple<int, int> to_cartesian(std::string notation)
 	{
 		/** Convert coordinates from board notation ("A1") to cartesian (0, 0). */
-		// do math on the ascii values
 		int a = notation[0] - 'A';
 		int b = notation[1] - '1';
 
@@ -54,7 +56,6 @@ struct Coordinate {
 	static std::string to_notation(int x, int y)
 	{
 		/** Convert coordinates from cartesian (0, 0) to board notation ("A1"). */
-		// do math on the ascii values
 		char a = 'A' + x;
 		char b = '1' + y;
 
@@ -81,40 +82,25 @@ struct Component {
 	}
 };
 
-int dfs(const intboard& map, boolboard& visited, int row, int col, int size) {
+int dfs(const intboard& map, boolboard& visited, Coordinate coord, int size) {
 	/**
 		Performs a depth first search at row/column, recursively looking for neighbors with the same value.
 
 		@return The size of the component found.
 	*/
-	visited[row][col] = true;
+	visited[coord.row()][coord.col()] = true;
 	size++;
 
-	std::pair<int, int> neighbors[4] = {
-		{
-			row,
-			std::min(col + 1, SIZE - 1) // right
-		},
-		{
-			std::min(row + 1, SIZE - 1), // down
-			col
-		},
-		{
-			row,
-			std::max(col-1, 0) // left
-		},
-		{
-			std::max(row - 1, 0), // up
-			col
-		},
+	Coordinate neighbors[4] = {
+		Coordinate(std::min(coord.x + 1, SIZE - 1), coord.y),  // right
+		Coordinate(coord.x, std::min(coord.y + 1, SIZE - 1)),  // down
+		Coordinate(std::max(coord.x - 1, 0), coord.y),  // left
+		Coordinate(coord.x, std::max(coord.y - 1, 0)),  // up
 	};
 
-	for (const auto& n : neighbors) {
-		const int & nrow = n.first;
-		const int & ncol = n.second;
-
-		if (!visited[nrow][ncol] && map[nrow][ncol] == map[row][col]) {
-			size = dfs(map, visited, nrow, ncol, size);
+	for (Coordinate& n : neighbors) {
+		if (!visited[n.row()][n.col()] && map[n.row()][n.col()] == map[coord.row()][coord.col()]) {
+			size = dfs(map, visited, n, size);
 		}
 	}
 
@@ -128,10 +114,12 @@ int count_components(intboard& map) {
 		for (int col = 0; col < SIZE; col++) {
 			if (!visited[row][col]) {
 				components++;
-				int depth = dfs(map, visited, row, col, 0);
-				const int & group = map[row][col];
 
-				std::cout << "Component of group " << map[row][col] << " was depth " << depth << "!" << std::endl;
+				Coordinate coord = Coordinate(col, row);
+				int depth = dfs(map, visited, coord, 0);
+				const int & group = map[coord.row()][coord.col()];
+
+				std::cout << "Component of group " << map[coord.row()][coord.col()] << " was depth " << depth << "!" << std::endl;
 				if (group == 0 && depth < SIZE) {
 					std::cout << "Illegal: This selection would create an area too small to be selected." << std::endl;
 				}
