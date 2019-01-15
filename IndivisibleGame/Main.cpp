@@ -23,28 +23,23 @@ intboard ARR = { {
 struct Coordinate {
 	int x, y;
 
-	Coordinate() {
-		x = 0;
-		y = 0;
-	}
+	Coordinate()
+		: x(0), y(0) {}
 
-	Coordinate(int xx, int yy)
-	{
-		x = xx;
-		y = yy;
-	}
+	Coordinate(const int& x, const int& y)
+		: x(x), y(y) {}
 
-	Coordinate(std::string notation)
+	Coordinate(const std::string& notation)
 	{
 		std::tuple<int, int> xy = to_cartesian(notation);
 		x = std::get<0>(xy);
 		y = std::get<1>(xy);
 	}
 
-	int & col() { return x; }
-	int & row() { return y; }
+	int col() const { return x; }
+	int row() const { return y; }
 
-	static std::tuple<int, int> to_cartesian(std::string notation)
+	static std::tuple<int, int> to_cartesian(const std::string& notation)
 	{
 		/** Convert coordinates from board notation ("A1") to cartesian (0, 0). */
 		int a = notation[0] - 'A';
@@ -53,7 +48,7 @@ struct Coordinate {
 		return std::tuple<int, int>(a, b);
 	}
 
-	static std::string to_notation(int x, int y)
+	static std::string to_notation(const int& x, const int& y)
 	{
 		/** Convert coordinates from cartesian (0, 0) to board notation ("A1"). */
 		char a = 'A' + x;
@@ -74,17 +69,13 @@ struct Component {
 	int size;
 	int group;
 
-	Component(Coordinate root, int size, int group)
-	{
-		root = root;
-		size = size;
-		group = group;
-	}
+	Component(const Coordinate& root, const int& size, const int& group)
+		: root(root), size(size), group(group) {}
 };
 
-int dfs(const intboard& map, boolboard& visited, Coordinate coord, int size) {
+int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int size) {
 	/**
-		Performs a depth first search at row/column, recursively looking for neighbors with the same value.
+		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
 
 		@return The size of the component found.
 	*/
@@ -107,7 +98,7 @@ int dfs(const intboard& map, boolboard& visited, Coordinate coord, int size) {
 	return size;
 }
 
-int count_components(intboard& map) {
+int count_components(const intboard& map) {
 	boolboard visited = { 0 };
 	int components = 0;
 	for (int row = 0; row < SIZE; row++) {
@@ -132,7 +123,7 @@ int count_components(intboard& map) {
 	return components;
 }
 
-bool is_invalid_char(char ch)
+bool is_invalid_char(const char& ch)
 {
 	/**
 		Checks if a char is invalid for tile notation.
@@ -143,7 +134,7 @@ bool is_invalid_char(char ch)
 	return not std::isalnum(static_cast<unsigned char>(ch));
 }
 
-std::vector<Coordinate> parse_selection(std::string input)
+std::vector<Coordinate> parse_selection(const std::string& input)
 {
 	/**
 		Parses the user's input for selecting tiles. Does some cleaning and validation.
