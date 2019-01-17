@@ -76,11 +76,14 @@ int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int si
 	visited[coord.row()][coord.col()] = true;
 	size++;
 
+	const int& x = coord.x;
+	const int& y = coord.y;
+
 	Coordinate neighbors[4] = {
-		Coordinate(std::min(coord.x + 1, SIZE - 1), coord.y),  // right
-		Coordinate(coord.x, std::min(coord.y + 1, SIZE - 1)),  // down
-		Coordinate(std::max(coord.x - 1, 0), coord.y),  // left
-		Coordinate(coord.x, std::max(coord.y - 1, 0)),  // up
+		Coordinate(std::min(x + 1, SIZE - 1), y),  // right
+		Coordinate(x, std::min(y + 1, SIZE - 1)),  // down
+		Coordinate(std::max(x - 1, 0), y),  // left
+		Coordinate(x, std::max(y - 1, 0)),  // up
 	};
 
 	for (Coordinate& n : neighbors) {
