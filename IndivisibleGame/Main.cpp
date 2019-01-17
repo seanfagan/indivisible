@@ -170,7 +170,7 @@ int main()
 	{
 		std::cout << "Group: " << c.group << " | Root: " << c.root.x << "," << c.root.y << " | Size: " << c.size << std::endl;
 		if (c.group == 0 && c.size < SIZE) {
-			std::cout << "Illegal: This selection would craete an area too small to be selected." << std::endl;
+			std::cout << "Illegal: This selection would create an area too small to be selected." << std::endl;
 		}
 		else if (c.group != 0 && c.size != SIZE) {
 			std::cout << "Illegal: Every selection must be " << SIZE << " tiles." << std::endl;
