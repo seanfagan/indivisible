@@ -56,12 +56,6 @@ struct Coordinate {
 
 		return std::string{ a, b };
 	}
-
-	std::string Display()
-	{
-		/** Return a string that represents the coord. */
-		return to_notation(x, y);
-	}
 };
 
 struct Component {
@@ -186,11 +180,6 @@ int main()
 	// parse input into vector
 	std::vector<Coordinate> result = parse_selection(input);
 
-	// print vector
-	for (auto i : result)
-	{
-		std::cout << i.Display() << "|";
-	}
 	std::cout << std::endl;
 	*/
 
