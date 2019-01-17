@@ -92,25 +92,18 @@ int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int si
 	return size;
 }
 
-int count_components(const intboard& map) {
+std::vector<Component> count_components(const intboard& map) {
 	boolboard visited = { 0 };
-	int components = 0;
+	std::vector<Component> components;
 	for (int row = 0; row < SIZE; row++) {
 		for (int col = 0; col < SIZE; col++) {
 			if (!visited[row][col]) {
-				components++;
-
+				// New component found
 				Coordinate coord = Coordinate(col, row);
-				int depth = dfs(map, visited, coord, 0);
+				int size = dfs(map, visited, coord, 0);
 				const int & group = map[coord.row()][coord.col()];
 
-				std::cout << "Component of group " << map[coord.row()][coord.col()] << " was depth " << depth << "!" << std::endl;
-				if (group == 0 && depth < SIZE) {
-					std::cout << "Illegal: This selection would create an area too small to be selected." << std::endl;
-				}
-				else if (group != 0 && depth != SIZE) {
-					std::cout << "Illegal: Every selection must be " << SIZE << " tiles." << std::endl;
-				}
+				components.push_back(Component(coord, size, group));
 			}  
 		}
 	}
@@ -169,8 +162,17 @@ int main()
 {
 	std::cout << "Hi world." << std::endl;
 
-	int components = count_components(ARR);
-	std::cout << "Components found: " << components << std::endl;
+	std::vector<Component> components = count_components(ARR);
+	for (auto c : components)
+	{
+		std::cout << "Group: " << c.group << " | Root: " << c.root.x << "," << c.root.y << " | Size: " << c.size << std::endl;
+		if (c.group == 0 && c.size < SIZE) {
+			std::cout << "Illegal: This selection would craete an area too small to be selected." << std::endl;
+		}
+		else if (c.group != 0 && c.size != SIZE) {
+			std::cout << "Illegal: Every selection must be " << SIZE << " tiles." << std::endl;
+		}
+	}
 
 	/*
 	// get input
