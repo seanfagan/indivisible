@@ -1,3 +1,4 @@
+#include "Coordinate.h"
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -16,48 +17,11 @@ intboard ARR = { {
 	{2, 2, 0, 1, 1},
 	{2, 2, 0, 0, 1},
 	{0, 2, 0, 0, 1},
-	{0, 1, 0, 0, 1},
-	{0, 1, 0, 0, 0},
+	{0, 5, 0, 0, 1},
+	{0, 5, 0, 0, 0},
 } };
 
-struct Coordinate {
-	int x, y;
-
-	Coordinate()
-		: x(0), y(0) {}
-
-	Coordinate(const int& x, const int& y)
-		: x(x), y(y) {}
-
-	Coordinate(const std::string& notation)
-	{
-		std::tuple<int, int> xy = to_cartesian(notation);
-		x = std::get<0>(xy);
-		y = std::get<1>(xy);
-	}
-
-	int col() const { return x; }
-	int row() const { return y; }
-
-	static std::tuple<int, int> to_cartesian(const std::string& notation)
-	{
-		/** Convert coordinates from board notation ("A1") to cartesian (0, 0). */
-		int a = notation[0] - 'A';
-		int b = notation[1] - '1';
-
-		return std::tuple<int, int>(a, b);
-	}
-
-	static std::string to_notation(const int& x, const int& y)
-	{
-		/** Convert coordinates from cartesian (0, 0) to board notation ("A1"). */
-		char a = 'A' + x;
-		char b = '1' + y;
-
-		return std::string{ a, b };
-	}
-};
-
+/** Data */
 struct Component {
 	Coordinate root;
 	int size;
@@ -67,6 +31,7 @@ struct Component {
 		: root(root), size(size), group(group) {}
 };
 
+/** Graph stuff */
 int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int size) {
 	/**
 		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
@@ -113,6 +78,19 @@ std::vector<Component> count_components(const intboard& map) {
 	return components;
 }
 
+intboard increment_board(intboard board) {
+	for (int row = 0; row < SIZE; row++) {
+		for (int col = 0; col < SIZE; col++) {
+			if (board[row][col]) {
+				board[row][col]++;
+			}
+		}
+	}
+
+	return board;
+}
+
+/** User input */
 bool is_invalid_char(const char& ch)
 {
 	/**
@@ -165,7 +143,9 @@ int main()
 {
 	std::cout << "Hi world." << std::endl;
 
-	std::vector<Component> components = count_components(ARR);
+	intboard myarr = increment_board(ARR);
+
+	std::vector<Component> components = count_components(myarr);
 	for (auto c : components)
 	{
 		std::cout << "Group: " << c.group << " | Root: " << c.root.x << "," << c.root.y << " | Size: " << c.size << std::endl;
