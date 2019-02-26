@@ -120,6 +120,7 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Board.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Coordinate.h" />
   </ItemGroup>
