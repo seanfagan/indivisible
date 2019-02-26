@@ -1,5 +1,7 @@
 #include "Coordinate.h"
 #include "Component.h"
+#include "Board.h"
+
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -12,7 +14,6 @@
 
 #define SIZE 5
 using intboard = std::array<std::array<int, SIZE>, SIZE>;
-using boolboard = std::array<std::array<bool, SIZE>, SIZE>;
 
 intboard ARR = { {
 	{2, 2, 0, 1, 1},
@@ -23,13 +24,13 @@ intboard ARR = { {
 } };
 
 /** Graph stuff */
-int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int size) {
+int dfs(const intboard& map, Board<bool>& visited, const Coordinate& coord, int size) {
 	/**
 		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
 
 		@return The size of the component found.
 	*/
-	visited[coord.row][coord.col] = true;
+	visited.set(coord, true);
 	size++;
 
 	const int& x = coord.x;
@@ -43,7 +44,7 @@ int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int si
 	};
 
 	for (Coordinate& n : neighbors) {
-		if (!visited[n.row][n.col] && map[n.row][n.col] == map[coord.row][coord.col]) {
+		if (!visited.get(n) && map[n.row][n.col] == map[coord.row][coord.col]) {
 			size = dfs(map, visited, n, size);
 		}
 	}
@@ -52,11 +53,11 @@ int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int si
 }
 
 std::vector<Component> count_components(const intboard& map) {
-	boolboard visited = { 0 };
+	Board<bool> visited(0);
 	std::vector<Component> components;
 	for (int row = 0; row < SIZE; row++) {
 		for (int col = 0; col < SIZE; col++) {
-			if (!visited[row][col]) {
+			if (!visited.get(col, row)) {
 				// New component found
 				Coordinate coord = Coordinate(col, row);
 				int size = dfs(map, visited, coord, 0);
