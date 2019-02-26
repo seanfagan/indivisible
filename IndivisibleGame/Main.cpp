@@ -1,4 +1,5 @@
 #include "Coordinate.h"
+#include "Component.h"
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -20,16 +21,6 @@ intboard ARR = { {
 	{0, 5, 0, 0, 1},
 	{0, 5, 0, 0, 0},
 } };
-
-/** Data */
-struct Component {
-	Coordinate root;
-	int size;
-	int group;
-
-	Component(const Coordinate& root, const int& size, const int& group)
-		: root(root), size(size), group(group) {}
-};
 
 /** Graph stuff */
 int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int size) {
