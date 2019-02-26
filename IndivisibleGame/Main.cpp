@@ -13,18 +13,17 @@
 #include <vector>
 
 #define SIZE 5
-using intboard = std::array<std::array<int, SIZE>, SIZE>;
 
-intboard ARR = { {
+Board<int> ARR({ {
 	{2, 2, 0, 1, 1},
 	{2, 2, 0, 0, 1},
 	{0, 2, 0, 0, 1},
 	{0, 5, 0, 0, 1},
 	{0, 5, 0, 0, 0},
-} };
+} });
 
 /** Graph stuff */
-int dfs(const intboard& map, Board<bool>& visited, const Coordinate& coord, int size) {
+int dfs(const Board<int>& map, Board<bool>& visited, const Coordinate& coord, int size) {
 	/**
 		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
 
@@ -44,7 +43,7 @@ int dfs(const intboard& map, Board<bool>& visited, const Coordinate& coord, int 
 	};
 
 	for (Coordinate& n : neighbors) {
-		if (!visited.get(n) && map[n.row][n.col] == map[coord.row][coord.col]) {
+		if (!visited.get(n) && map.get(n) == map.get(coord)) {
 			size = dfs(map, visited, n, size);
 		}
 	}
@@ -52,7 +51,7 @@ int dfs(const intboard& map, Board<bool>& visited, const Coordinate& coord, int 
 	return size;
 }
 
-std::vector<Component> count_components(const intboard& map) {
+std::vector<Component> count_components(const Board<int>& map) {
 	Board<bool> visited(0);
 	std::vector<Component> components;
 	for (int row = 0; row < SIZE; row++) {
@@ -61,20 +60,22 @@ std::vector<Component> count_components(const intboard& map) {
 				// New component found
 				Coordinate coord = Coordinate(col, row);
 				int size = dfs(map, visited, coord, 0);
-				const int & group = map[coord.row][coord.col];
+				const int & group = map.get(coord);
 
 				components.push_back(Component(coord, size, group));
 			}  
 		}
 	}
+
 	return components;
 }
 
-intboard increment_board(intboard board) {
+Board<int> increment_board(Board<int> board) {
 	for (int row = 0; row < SIZE; row++) {
 		for (int col = 0; col < SIZE; col++) {
-			if (board[row][col]) {
-				board[row][col]++;
+			const int& val = board.get(col, row);
+			if (val) {
+				board.set(col, row, val + 1);
 			}
 		}
 	}
@@ -135,9 +136,9 @@ int main()
 {
 	std::cout << "Hi world." << std::endl;
 
-	intboard myarr = increment_board(ARR);
+	//Board<int> myarr = increment_board(ARR);
 
-	std::vector<Component> components = count_components(myarr);
+	std::vector<Component> components = count_components(ARR);
 	for (auto c : components)
 	{
 		std::cout << "Group: " << c.group << " | Root: " << c.root.x << "," << c.root.y << " | Size: " << c.size << std::endl;
