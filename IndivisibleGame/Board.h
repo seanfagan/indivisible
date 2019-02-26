@@ -5,8 +5,11 @@
 template<typename T>
 class Board {
 public:
-	Board(T init_value) {
+	Board(const T& init_value) {
 		fill(init_value);
+	}
+	Board(const std::array<std::array<T, 5>, 5>& init_array) {
+		m_arr = init_array;
 	}
 
 	T get(const Coordinate& coord) const {
