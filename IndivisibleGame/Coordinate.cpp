@@ -31,10 +31,3 @@ Coordinate::Coordinate(const std::string& notation) {
 	y = std::get<1>(xy);
 }
 
-int Coordinate::col() const {
-	return x;
-}
-
-int Coordinate::row() const {
-	return y;
-}

@@ -29,12 +29,12 @@ int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int si
 
 		@return The size of the component found.
 	*/
-	visited[coord.row()][coord.col()] = true;
+	visited[coord.row][coord.col] = true;
 	size++;
 
 	const int& x = coord.x;
 	const int& y = coord.y;
-
+	
 	Coordinate neighbors[4] = {
 		Coordinate(std::min(x + 1, SIZE - 1), y),  // right
 		Coordinate(x, std::min(y + 1, SIZE - 1)),  // down
@@ -43,7 +43,7 @@ int dfs(const intboard& map, boolboard& visited, const Coordinate& coord, int si
 	};
 
 	for (Coordinate& n : neighbors) {
-		if (!visited[n.row()][n.col()] && map[n.row()][n.col()] == map[coord.row()][coord.col()]) {
+		if (!visited[n.row][n.col] && map[n.row][n.col] == map[coord.row][coord.col]) {
 			size = dfs(map, visited, n, size);
 		}
 	}
@@ -60,7 +60,7 @@ std::vector<Component> count_components(const intboard& map) {
 				// New component found
 				Coordinate coord = Coordinate(col, row);
 				int size = dfs(map, visited, coord, 0);
-				const int & group = map[coord.row()][coord.col()];
+				const int & group = map[coord.row][coord.col];
 
 				components.push_back(Component(coord, size, group));
 			}  
