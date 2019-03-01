@@ -13,6 +13,7 @@
 #include <vector>
 
 #define SIZE 5
+using adjboard = std::array<std::array<std::vector<Coordinate>, SIZE>, SIZE>;
 
 Board<int> ARR({ {
 	{2, 2, 0, 1, 1},
@@ -23,7 +24,7 @@ Board<int> ARR({ {
 } });
 
 /** Graph stuff */
-int dfs(const Board<int>& map, Board<bool>& visited, const Coordinate& coord, int size) {
+int dfs(const Board<int>& map, const adjboard& adjs, Board<bool>& visited, const Coordinate& coord, int size) {
 	/**
 		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
 
@@ -32,19 +33,10 @@ int dfs(const Board<int>& map, Board<bool>& visited, const Coordinate& coord, in
 	visited.set(coord, true);
 	size++;
 
-	const int& x = coord.x;
-	const int& y = coord.y;
-	
-	Coordinate neighbors[4] = {
-		Coordinate(std::min(x + 1, SIZE - 1), y),  // right
-		Coordinate(x, std::min(y + 1, SIZE - 1)),  // down
-		Coordinate(std::max(x - 1, 0), y),  // left
-		Coordinate(x, std::max(y - 1, 0)),  // up
-	};
-
-	for (Coordinate& n : neighbors) {
+	std::vector<Coordinate> me = adjs[coord.y][coord.x];
+	for (Coordinate& n : me) {
 		if (!visited.get(n) && map.get(n) == map.get(coord)) {
-			size = dfs(map, visited, n, size);
+			size = dfs(map, adjs, visited, n, size);
 		}
 	}
 
@@ -54,15 +46,37 @@ int dfs(const Board<int>& map, Board<bool>& visited, const Coordinate& coord, in
 std::vector<Component> count_components(const Board<int>& map) {
 	Board<bool> visited(0);
 	std::vector<Component> components;
+
+	// -- adjacents
+	adjboard adjs;  // todo: size
+
+	for (int y = 0; y < adjs.size(); ++y) {
+		for (int x = 0; x < adjs[0].size(); ++x) {
+			std::vector<Coordinate>& cell = adjs[y][x];
+
+			if (y > 0) {
+				cell.push_back(Coordinate(x, y - 1));  // up
+			}
+			if (y + 1 < adjs.size()) {
+				cell.push_back(Coordinate(x, y + 1));  // down
+			}
+			if (x > 0) {
+				cell.push_back(Coordinate(x - 1, y));  // left
+			}
+			if (x + 1 < adjs[0].size()) {
+				cell.push_back(Coordinate(x + 1, y));  // right
+			}
+		}
+	}
+
 	for (int row = 0; row < SIZE; row++) {
 		for (int col = 0; col < SIZE; col++) {
 			if (!visited.get(col, row)) {
 				// New component found
 				Coordinate coord = Coordinate(col, row);
-				int size = dfs(map, visited, coord, 0);
-				const int & group = map.get(coord);
+				int size = dfs(map, adjs, visited, coord, 0);
 
-				components.push_back(Component(coord, size, group));
+				components.push_back(Component(coord, size, map.get(coord)));
 			}  
 		}
 	}
