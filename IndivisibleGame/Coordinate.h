@@ -3,8 +3,6 @@
 
 struct Coordinate {
 	int x, y;
-	const int& col = x;
-	const int& row = y;
 
 	Coordinate();
 	Coordinate(const int& x, const int& y);

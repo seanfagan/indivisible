@@ -13,7 +13,7 @@ public:
 	}
 
 	T get(const Coordinate& coord) const {
-		return m_arr[coord.row][coord.col];
+		return m_arr[coord.y][coord.x];
 	}
 
 	T get(const int& x, const int& y) const {
@@ -21,7 +21,7 @@ public:
 	}
 
 	void set(const Coordinate& coord, const T& value) {
-		m_arr[coord.row][coord.col] = value;
+		m_arr[coord.y][coord.x] = value;
 	}
 
 	void set(const int& x, const int& y, const T& value) {
