@@ -6,6 +6,7 @@
 #include <array>
 #include <cctype>
 #include <iostream>
+#include <random>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -23,67 +24,117 @@ Board<int> ARR({ {
 	{0, 5, 0, 0, 0},
 } });
 
+class Graph {
+public:
+	Graph(const int& seed) {
+		initialize(seed);
+	}
+private:
+	struct Node {
+		enum Party : char {
+			A, B
+		};
+
+		Coordinate m_coord;
+		Party m_party;
+		int m_population = 0;
+		std::vector<Coordinate> m_adjacents;
+		int m_selection = 0;
+
+		void print() {
+			// std::cout << "cor: " << m_coord.x << m_coord.y;
+			// std::cout << " prt: " << m_party;
+			// std::cout << " pop: " << m_population;
+			// std::cout << " adj : " << m_adjacents.size();
+			std::cout << " sct: " << m_selection;
+		}
+	};
+	std::array<std::array<Node, SIZE>, SIZE> nodes;
+
+	void initialize(const int& seed) {
+		// Random generator
+		std::minstd_rand rando;
+		rando.seed(seed);
+
+		// For every node
+		for (int y = 0; y < nodes.size(); ++y) {
+			for (int x = 0; x < nodes[0].size(); ++x) {
+				// Set initial values
+				Node& n = nodes[y][x];
+				n.m_coord = Coordinate(x, y);
+				n.m_party = static_cast<Node::Party>(rando() % 2);
+				n.m_population = rando() % 3 + 1;
+				n.m_selection = rando() % 3;
+				set_adjacency_list(n);
+				n.print(); // debug
+				std::cout << " | ";
+			}
+			std::cout << std::endl;
+		}
+	}
+
+	void set_adjacency_list(Node& n) {
+		// Push coordinates of adjacent nodes to Node.
+		std::vector<Coordinate>& adjs = n.m_adjacents;
+		const int& nx = n.m_coord.x;
+		const int& ny = n.m_coord.y;
+
+		if (ny > 0) {
+			adjs.push_back(Coordinate(nx, ny - 1)); // up
+		}
+		if (ny + 1 < nodes.size()) {
+			adjs.push_back(Coordinate(nx, ny + 1));  // down
+		}
+		if (nx > 0) {
+			adjs.push_back(Coordinate(nx - 1, ny));  // left
+		}
+		if (nx + 1 < nodes[0].size()) {
+			adjs.push_back(Coordinate(nx + 1, ny));  // right
+		}
+	}
+public:
+	std::vector<Component> count_components() {
+		Board<bool> visited(0);
+		std::vector<Component> components;
+
+		for (int y = 0; y < nodes.size(); ++y) {
+			for (int x = 0; x < nodes[0].size(); ++x) {
+				if (!visited.get(x, y)) {
+					// New component found
+					Coordinate coord(x, y);
+					int size = dfs(coord, visited, 0);
+
+					components.push_back(Component(coord, size, nodes[y][x].m_selection));
+				}
+			}
+		}
+
+		return components;
+	}
+private:
+	int dfs(const Coordinate& coord, Board<bool>& visited, int size) {
+		/**
+			Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
+
+			@return The size of the component found.
+		*/
+		visited.set(coord, true);
+		size++;
+
+		const Node& me = nodes[coord.y][coord.x];
+		for (const Coordinate& n : me.m_adjacents) {
+			if (!visited.get(n)) {
+				const Node& you = nodes[n.y][n.x];
+				if (!visited.get(n) && you.m_selection == me.m_selection) {
+					size = dfs(n, visited, size);
+				}
+			}
+		}
+		return size;
+	}
+};
+
 /** Graph stuff */
-int dfs(const Board<int>& map, const adjboard& adjs, Board<bool>& visited, const Coordinate& coord, int size) {
-	/**
-		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
-
-		@return The size of the component found.
-	*/
-	visited.set(coord, true);
-	size++;
-
-	std::vector<Coordinate> me = adjs[coord.y][coord.x];
-	for (Coordinate& n : me) {
-		if (!visited.get(n) && map.get(n) == map.get(coord)) {
-			size = dfs(map, adjs, visited, n, size);
-		}
-	}
-
-	return size;
-}
-
-std::vector<Component> count_components(const Board<int>& map) {
-	Board<bool> visited(0);
-	std::vector<Component> components;
-
-	// -- adjacents
-	adjboard adjs;  // todo: size
-
-	for (int y = 0; y < adjs.size(); ++y) {
-		for (int x = 0; x < adjs[0].size(); ++x) {
-			std::vector<Coordinate>& cell = adjs[y][x];
-
-			if (y > 0) {
-				cell.push_back(Coordinate(x, y - 1));  // up
-			}
-			if (y + 1 < adjs.size()) {
-				cell.push_back(Coordinate(x, y + 1));  // down
-			}
-			if (x > 0) {
-				cell.push_back(Coordinate(x - 1, y));  // left
-			}
-			if (x + 1 < adjs[0].size()) {
-				cell.push_back(Coordinate(x + 1, y));  // right
-			}
-		}
-	}
-
-	for (int row = 0; row < SIZE; row++) {
-		for (int col = 0; col < SIZE; col++) {
-			if (!visited.get(col, row)) {
-				// New component found
-				Coordinate coord = Coordinate(col, row);
-				int size = dfs(map, adjs, visited, coord, 0);
-
-				components.push_back(Component(coord, size, map.get(coord)));
-			}  
-		}
-	}
-
-	return components;
-}
-
 Board<int> increment_board(Board<int> board) {
 	for (int row = 0; row < SIZE; row++) {
 		for (int col = 0; col < SIZE; col++) {
@@ -150,9 +201,14 @@ int main()
 {
 	std::cout << "Hi world." << std::endl;
 
-	//Board<int> myarr = increment_board(ARR);
+	Graph g(123);
+	std::vector<Component> components = g.count_components();
 
-	std::vector<Component> components = count_components(ARR);
+	std::cout << "Yo world!" << std::endl;
+
+	//Board<int> myarr = increment_board(ARR);
+	
+	//std::vector<Component> components = count_components(ARR);
 	for (auto c : components)
 	{
 		std::cout << "Group: " << c.group << " | Root: " << c.root.x << "," << c.root.y << " | Size: " << c.size << std::endl;
@@ -163,7 +219,7 @@ int main()
 			std::cout << "Illegal: Every selection must be " << SIZE << " tiles." << std::endl;
 		}
 	}
-
+	
 	/*
 	// get input
 	std::string input;
