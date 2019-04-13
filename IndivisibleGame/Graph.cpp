@@ -1,8 +1,27 @@
 #include "Graph.h"
 #include <random>
+#include <iostream>
 
 Graph::Graph(const int& seed) {
 	initialize(seed);
+}
+
+const Node* Graph::get_node(const Coordinate& coord) const {
+	return &nodes[coord.y][coord.x];
+}
+
+const Node* Graph::get_node(const int& x, const int& y) const {
+	return &nodes[y][x];
+}
+
+void Graph::print() const {
+	for (int y = 0; y < nodes.size(); ++y) {
+		for (int x = 0; x < nodes.size(); ++x) {
+			const Node* n = get_node(x, y);
+			std::cout << "| " << n->m_selection << " |";
+		}
+		std::cout << std::endl;
+	}
 }
 
 std::vector<Component> Graph::get_selections() {
@@ -13,10 +32,12 @@ std::vector<Component> Graph::get_selections() {
 		for (int x = 0; x < nodes[0].size(); ++x) {
 			if (!visited.get(x, y)) {
 				// New component found
-				Coordinate coord(x, y);
-				int size = dfs_selections(coord, visited, 0);
+				const Node* start = get_node(x, y);
+				Component new_component(start);
 
-				components.push_back(Component(coord, size, nodes[y][x].m_selection));
+				dfs_selections(start, visited, new_component);
+
+				components.push_back(new_component);
 			}
 		}
 	}
@@ -32,11 +53,11 @@ void Graph::initialize(const int& seed) {
 	// For every node
 	for (int y = 0; y < nodes.size(); ++y) {
 		for (int x = 0; x < nodes[0].size(); ++x) {
-			// Set initial values
 			Node& n = nodes[y][x];
+			// Set initial values
 			n.m_coord = Coordinate(x, y);
 			n.m_party = static_cast<Node::Party>(rando() % 2);
-			n.m_population = rando() % 3 + 1;
+			n.m_population = 1;  // todo
 			n.m_selection = rando() % 3;
 			set_adjacency_list(n);
 		}
@@ -44,42 +65,36 @@ void Graph::initialize(const int& seed) {
 }
 
 void Graph::set_adjacency_list(Node& n) {
-	// Push coordinates of adjacent nodes to a vector in Node.
-	std::vector<Coordinate>& adjs = n.m_adjacents;
-	const int& nx = n.m_coord.x;
-	const int& ny = n.m_coord.y;
+	// Push the addresses of adjacent nodes to a vector in Node.
+	const int& x = n.m_coord.x;
+	const int& y = n.m_coord.y;
 
-	if (ny > 0) {
-		adjs.push_back(Coordinate(nx, ny - 1)); // up
+	if (y > 0) {
+		const Node* up = get_node(x, y - 1);
+		n.m_adjacents.push_back(up);
 	}
-	if (ny + 1 < nodes.size()) {
-		adjs.push_back(Coordinate(nx, ny + 1));  // down
+	if (y + 1 < nodes.size()) {
+		const Node* down = get_node(x, y + 1);
+		n.m_adjacents.push_back(down);
 	}
-	if (nx > 0) {
-		adjs.push_back(Coordinate(nx - 1, ny));  // left
+	if (x > 0) {
+		const Node* left = get_node(x - 1, y);
+		n.m_adjacents.push_back(left);
 	}
-	if (nx + 1 < nodes[0].size()) {
-		adjs.push_back(Coordinate(nx + 1, ny));  // right
+	if (x + 1 < nodes[0].size()) {
+		const Node* right = get_node(x + 1, y);
+		n.m_adjacents.push_back(right);
 	}
 }
 
-int Graph::dfs_selections(const Coordinate& coord, Board<bool>& visited, int size) {
-	/**
-		Performs a depth first search from coordinate, recursively looking for neighbors with the same value.
+void Graph::dfs_selections(const Node* node, Board<bool>& visited, Component& connected) {
+	// Performs a depth-first-search, recursively building a vector of adjacent nodes with the same value.
+	visited.set(node->m_coord, true);
 
-		@return The size of the component found.
-	*/
-	visited.set(coord, true);
-	size++;
-
-	const Node& me = nodes[coord.y][coord.x];
-	for (const Coordinate& n : me.m_adjacents) {
-		if (!visited.get(n)) {
-			const Node& you = nodes[n.y][n.x];
-			if (!visited.get(n) && you.m_selection == me.m_selection) {
-				size = dfs_selections(n, visited, size);
-			}
+	for (const Node* adj : node->m_adjacents) {
+		if (!visited.get(adj->m_coord) && node->m_selection == adj->m_selection) {
+			connected.push_back(adj);  // add node to connected component
+			dfs_selections(adj, visited, connected);
 		}
 	}
-	return size;
 }
