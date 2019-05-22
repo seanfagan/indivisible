@@ -24,6 +24,65 @@ void Graph::print() const {
 	}
 }
 
+void Graph::input_selection(const std::vector<Coordinate>& coords) {
+	// Create a snapshot of current selections, for backup
+	Board<int> temp_selections(0);
+
+	for (const auto& n : nodes) {
+		for (const auto& m : n) {
+			temp_selections.set(m.m_coord, m.m_selection);
+		}
+	}
+
+	// iterate graph's selection history
+	for (auto& row : nodes) {
+		for (auto& node : row) {
+			if (node.m_selection > 0) {
+				node.m_selection++;
+			}
+		}
+	}
+
+	// add new selection to graph
+	for (const Coordinate& c : coords) {
+		Node& n = nodes[c.y][c.x];
+		n.m_selection = 1;
+	}
+
+	// run depth-first-search to find connected components
+	std::vector<Component> components = get_selections();
+
+	// utilize components for error checking
+	bool valid = true;
+	for (auto c : components)
+	{
+		// std::cout << "Selection: " << c.root()->m_selection << " | Root: " << c.root()->m_coord.x << "," << c.root()->m_coord.y << " | Size: " << c.size() << std::endl;
+		if (c.root()->m_selection == 0 && c.size() < SIZE) {
+			// Case: Unselected area is too small for a valid selection.
+			valid = false;
+			std::cout << "[x] Illegal! This would create a pocket too small to be selected." << std::endl;
+		}
+		else if (c.root()->m_selection != 0 && c.size() != SIZE) {
+			// Case: Selection is too small.
+			valid = false;
+			std::cout << "[x] Illegal! Every selection must be " << SIZE << " tiles." << std::endl;
+		}
+	}
+
+	if (!valid) {
+		std::cout << "[!] Your selection was not applied." << std::endl;
+		// revert graph's selections back to snapshot
+		for (int y = 0; y < nodes.size(); ++y) {
+			for (int x = 0; x < nodes.size(); ++x) {
+				nodes[y][x].m_selection = temp_selections.get(x, y);
+			}
+		}
+	}
+	else {
+		std::cout << "[+] District created!" << std::endl;
+	}
+}
+
 std::vector<Component> Graph::get_selections() {
 	Board<bool> visited(0);
 	std::vector<Component> components;
@@ -58,7 +117,7 @@ void Graph::initialize(const int& seed) {
 			n.m_coord = Coordinate(x, y);
 			n.m_party = static_cast<Node::Party>(rando() % 2);
 			n.m_population = 1;  // todo
-			n.m_selection = rando() % 3;
+			// n.m_selection = rando() % 3;
 			set_adjacency_list(n);
 		}
 	}

@@ -78,32 +78,22 @@ int main()
 {
 	std::cout << "Hi world." << std::endl;
 
+	// create graph
 	Graph g(123);
-	std::vector<Component> components = g.get_selections();
-	g.print();
-	
-	//std::vector<Component> components = count_components(ARR);
-	for (auto c : components)
-	{
-		std::cout << "Selection: " << c.root()->m_selection << " | Root: " << c.root()->m_coord.x << "," << c.root()->m_coord.y << " | Size: " << c.size() << std::endl;
-		if (c.root()->m_selection == 0 && c.size() < SIZE) {
-			std::cout << "Illegal: This selection would create an area too small to be selected." << std::endl;
-		}
-		else if (c.root()->m_selection != 0 && c.size() != SIZE) {
-			std::cout << "Illegal: Every selection must be " << SIZE << " tiles." << std::endl;
-		}
-	}
-	
-	/*
-	// get input
-	std::string input;
-	std::getline(std::cin, input);
-
-	// parse input into vector
-	std::vector<Coordinate> result = parse_selection(input);
 
 	std::cout << std::endl;
-	*/
+
+	for (int i = 0; i < 10; ++i) {
+		g.print();
+
+		// get input
+		std::cout << "~~ Input your selection ~~" << std::endl;
+		std::string input;
+		std::getline(std::cin, input);
+		std::vector<Coordinate> selection = parse_selection(input);
+
+		g.input_selection(selection);
+	}
 
 	std::cout << "End" << std::endl;
 	std::cin.get();

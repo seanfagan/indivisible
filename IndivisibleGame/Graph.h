@@ -10,6 +10,7 @@ class Graph {
 public:
 	Graph(const int& seed);
 	std::vector<Component> get_selections();
+	void input_selection(const std::vector<Coordinate>& coords);
 	const Node* get_node(const Coordinate& coord) const;
 	const Node* get_node(const int& x, const int& y) const;
 	void print() const;  // debug
