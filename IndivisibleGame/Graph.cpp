@@ -24,17 +24,16 @@ void Graph::print() const {
 	}
 }
 
-void Graph::input_selection(const std::vector<Coordinate>& coords) {
-	// Create a snapshot of current selections, for backup
+bool Graph::input_selection(const std::vector<Coordinate>& coords) {
+	// Create a backup of current selections, in case validation fails
 	Board<int> temp_selections(0);
-
 	for (const auto& n : nodes) {
 		for (const auto& m : n) {
 			temp_selections.set(m.m_coord, m.m_selection);
 		}
 	}
 
-	// iterate graph's selection history
+	// Add 1 to graph's selection history
 	for (auto& row : nodes) {
 		for (auto& node : row) {
 			if (node.m_selection > 0) {
@@ -43,34 +42,53 @@ void Graph::input_selection(const std::vector<Coordinate>& coords) {
 		}
 	}
 
-	// add new selection to graph
-	for (const Coordinate& c : coords) {
-		Node& n = nodes[c.y][c.x];
-		n.m_selection = 1;
-	}
-
-	// run depth-first-search to find connected components
-	std::vector<Component> components = get_selections();
-
-	// utilize components for error checking
+	// Validate the input coordinates
 	bool valid = true;
-	for (auto c : components)
-	{
-		// std::cout << "Selection: " << c.root()->m_selection << " | Root: " << c.root()->m_coord.x << "," << c.root()->m_coord.y << " | Size: " << c.size() << std::endl;
-		if (c.root()->m_selection == 0 && c.size() < SIZE) {
-			// Case: Unselected area is too small for a valid selection.
-			valid = false;
-			std::cout << "[x] Illegal! This would create a pocket too small to be selected." << std::endl;
+	{ 
+		// check that inputs are within board size
+		for (const Coordinate& c : coords) {
+			if (c.x < 0 || c.x >= nodes.size() || c.y < 0 || c.y >= nodes.size()) {
+				std::cout << "[x] Illegal! __ is outside the valid range." << std::endl;
+				valid = false;
+				goto stop; // !!! exit
+			}
 		}
-		else if (c.root()->m_selection != 0 && c.size() != SIZE) {
-			// Case: Selection is too small.
-			valid = false;
-			std::cout << "[x] Illegal! Every selection must be " << SIZE << " tiles." << std::endl;
+
+		// add new selection to graph
+		for (const Coordinate& c : coords) {
+			Node& n = nodes[c.y][c.x];
+
+			// check that node is not already selected
+			if (n.m_selection != 0) {
+				std::cout << "[x] Illegal! __ has already been selected." << std::endl;
+				valid = false;
+				goto stop;  // !!! exit
+			}
+			n.m_selection = 1;
+		}
+
+		// run depth-first-search to find connected components
+		std::vector<Component> components = get_selections();
+
+		// utilize components for error checking
+		for (auto c : components)
+		{
+			// std::cout << "Selection: " << c.root()->m_selection << " | Root: " << c.root()->m_coord.x << "," << c.root()->m_coord.y << " | Size: " << c.size() << std::endl;
+			if (c.root()->m_selection == 0 && c.size() < SIZE) {
+				// Case: Unselected area is too small for a valid selection.
+				valid = false;
+				std::cout << "[x] Illegal! This would create a pocket too small to be selected." << std::endl;
+			}
+			else if (c.root()->m_selection != 0 && c.size() != SIZE) {
+				// Case: Selection is too small.
+				valid = false;
+				std::cout << "[x] Illegal! Every selection must be " << SIZE << " tiles." << std::endl;
+			}
 		}
 	}
+	stop:  // !!! GOTO label
 
 	if (!valid) {
-		std::cout << "[!] Your selection was not applied." << std::endl;
 		// revert graph's selections back to snapshot
 		for (int y = 0; y < nodes.size(); ++y) {
 			for (int x = 0; x < nodes.size(); ++x) {
@@ -78,9 +96,8 @@ void Graph::input_selection(const std::vector<Coordinate>& coords) {
 			}
 		}
 	}
-	else {
-		std::cout << "[+] District created!" << std::endl;
-	}
+
+	return valid;
 }
 
 std::vector<Component> Graph::get_selections() {

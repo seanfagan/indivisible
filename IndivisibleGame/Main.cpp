@@ -43,7 +43,7 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 		Parses the user's input for selecting tiles. Does some cleaning and validation.
 
 		@param input The user's input to parse.
-		@return A vector of all the user's tile selections.
+		@return A vector of all the user's coordinate selections.
 	*/
 	std::stringstream ss(input);
 	std::vector<Coordinate> result;
@@ -87,12 +87,19 @@ int main()
 		g.print();
 
 		// get input
-		std::cout << "~~ Input your selection ~~" << std::endl;
+		std::cout << "~~~ Input your selection ~~~" << std::endl;
 		std::string input;
 		std::getline(std::cin, input);
 		std::vector<Coordinate> selection = parse_selection(input);
 
-		g.input_selection(selection);
+		bool success = g.input_selection(selection);
+		if (!success) {
+			std::cout << "[!] Your selection was not applied." << std::endl;
+			// revert graph's selections back to snapshot
+		}
+		else {
+			std::cout << "[+] District created!" << std::endl;
+		}
 	}
 
 	std::cout << "End" << std::endl;
