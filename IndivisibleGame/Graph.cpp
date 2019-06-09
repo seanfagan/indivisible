@@ -48,7 +48,7 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 		// check that inputs are within board size
 		for (const Coordinate& c : coords) {
 			if (c.x < 0 || c.x >= nodes.size() || c.y < 0 || c.y >= nodes.size()) {
-				std::cout << "[x] Illegal! __ is outside the valid range." << std::endl;
+				std::cout << "[x] Illegal! " << c << " is outside the valid range." << std::endl;
 				valid = false;
 				goto stop; // !!! exit
 			}
@@ -60,7 +60,7 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 
 			// check that node is not already selected
 			if (n.m_selection != 0) {
-				std::cout << "[x] Illegal! __ has already been selected." << std::endl;
+				std::cout << "[x] Illegal! " << c << " has already been selected." << std::endl;
 				valid = false;
 				goto stop;  // !!! exit
 			}

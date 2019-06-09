@@ -1,6 +1,19 @@
 #include "Coordinate.h"
 #include <tuple>
 
+// operators
+std::ostream& operator<<(std::ostream& os, Coordinate& d)
+{
+	os << d.to_notation(d.x, d.y);
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Coordinate& d)
+{
+	os << d.to_notation(d.x, d.y);
+	return os;
+}
+
 // static
 std::tuple<int, int> Coordinate::to_cartesian(const std::string& notation) {
 	/** Convert coordinates from board notation ("A1") to cartesian (0, 0). */
