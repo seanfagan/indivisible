@@ -15,6 +15,92 @@ const Node* Graph::get_node(const int& x, const int& y) const {
 }
 
 void Graph::print() const {
+	std::string indent = "   ";
+	std::string hr = "+-----";
+	std::string vr = "|";
+	std::string party_a = " ... ";
+	std::string party_b = " ~~~ ";
+
+	// top line
+	std::cout << indent;
+	for (int i = 0; i < nodes.size(); ++i) {
+		std::cout << hr;
+	}
+	std::cout << "+" << std::endl;
+
+	// reverse iterate through rows
+	for (int row = nodes.size() - 1; row >= 0; --row) {
+		for (int ln = 0; ln < 4; ++ln) {
+			std::string prefix = "";  // 4 chars
+			std::string body = "";  // 5 chars + 1 separator char
+
+			// build prefix
+			if (ln == 1) {
+				prefix += std::to_string(row + 1) + "  |";
+			}
+			else if (ln == 3) {
+				prefix += "   +";
+			}
+			else {
+				prefix += "   |";
+			}
+
+			// iterate through columns
+			for (int col = 0; col < nodes.size(); ++col) {
+				const Node& n = nodes[row][col];
+				
+				// build body
+				if (ln == 1) {
+					// print the population
+					body += "  " + std::to_string(n.m_population) + "  ";
+				}
+				else if (ln == 3) {
+					// print the separators
+					bool connected = false;
+					for (auto& neigh : n.m_adjacents) {
+						// find vertical neighbor
+						if (neigh->m_coord.y < n.m_coord.y) {
+							connected = (neigh->m_selection == n.m_selection);
+						}
+					}
+
+					body += (connected ? "     " : "-----");
+				}
+				else {
+					// print the party
+					body += (n.m_party == Node::Party::A ? party_a : party_b);
+				}
+
+				// build suffix
+				if (ln == 3) {
+					body += "+";
+				}
+				else {
+					bool connected = false;
+					for (auto& neigh : n.m_adjacents) {
+						// find horizontal neighbor
+						if (neigh->m_coord.x > n.m_coord.x) {
+							connected = (neigh->m_selection == n.m_selection);
+						}
+					}
+					body += (connected ? " " : "|");
+				}
+			}
+			std::cout << prefix << body << std::endl;
+		}
+	}
+
+	// bottom line
+	std::cout << "    ";
+	for (int i = 0; i < nodes.size(); i++) {
+		char index = 'A' + i;
+		std::cout << "  " << std::string{ index } + "   ";
+	}
+	std::cout << std::endl;
+
+
+	/*
+	// old print
 	for (int y = 0; y < nodes.size(); ++y) {
 		for (int x = 0; x < nodes.size(); ++x) {
 			const Node* n = get_node(x, y);
@@ -22,6 +108,7 @@ void Graph::print() const {
 		}
 		std::cout << std::endl;
 	}
+	*/
 }
 
 bool Graph::input_selection(const std::vector<Coordinate>& coords) {
@@ -133,8 +220,7 @@ void Graph::initialize(const int& seed) {
 			// Set initial values
 			n.m_coord = Coordinate(x, y);
 			n.m_party = static_cast<Node::Party>(rando() % 2);
-			n.m_population = 1;  // todo
-			// n.m_selection = rando() % 3;
+			n.m_population = rando() % 3 + 1;
 			set_adjacency_list(n);
 		}
 	}
