@@ -1,5 +1,4 @@
 #pragma once
-#include "Component.h"
 #include "Board.h"
 #include "Node.h"
 #include <vector>
@@ -9,7 +8,7 @@
 class Graph {
 public:
 	Graph(const int& seed);
-	std::vector<Component> get_selections();
+	std::vector<std::vector<const Node*>> get_selections();
 	bool input_selection(const std::vector<Coordinate>& coords);
 	const Node* get_node(const Coordinate& coord) const;
 	const Node* get_node(const int& x, const int& y) const;
@@ -20,5 +19,5 @@ private:
 
 	void initialize(const int& seed);
 	void set_adjacency_list(Node& n);
-	void dfs_selections(const Node* node, Board<bool>& visited, Component& connected);
+	void dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected);
 };

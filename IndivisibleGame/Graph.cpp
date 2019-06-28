@@ -155,18 +155,18 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 		}
 
 		// run depth-first-search to find connected components
-		std::vector<Component> components = get_selections();
+		std::vector<std::vector<const Node*>> components = get_selections();
 
 		// utilize components for error checking
-		for (auto c : components)
+		for (const auto& c : components)
 		{
 			// std::cout << "Selection: " << c.root()->m_selection << " | Root: " << c.root()->m_coord.x << "," << c.root()->m_coord.y << " | Size: " << c.size() << std::endl;
-			if (c.root()->m_selection == 0 && c.size() < SIZE) {
+			if (c.front()->m_selection == 0 && c.size() < SIZE) {
 				// Case: Unselected area is too small for a valid selection.
 				valid = false;
 				std::cout << "[x] Illegal! This would create a pocket too small to be selected." << std::endl;
 			}
-			else if (c.root()->m_selection != 0 && c.size() != SIZE) {
+			else if (c.front()->m_selection != 0 && c.size() != SIZE) {
 				// Case: Selection is too small.
 				valid = false;
 				std::cout << "[x] Illegal! Every selection must be " << SIZE << " tiles." << std::endl;
@@ -187,16 +187,17 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 	return valid;
 }
 
-std::vector<Component> Graph::get_selections() {
+std::vector<std::vector<const Node*>> Graph::get_selections() {
 	Board<bool> visited(0);
-	std::vector<Component> components;
+	std::vector<std::vector<const Node*>> components;
 
 	for (int y = 0; y < nodes.size(); ++y) {
 		for (int x = 0; x < nodes[0].size(); ++x) {
 			if (!visited.get(x, y)) {
-				// New component found
+				// Beginning of a new component found
 				const Node* start = get_node(x, y);
-				Component new_component(start);
+				std::vector<const Node*> new_component;
+				new_component.push_back(start);
 
 				dfs_selections(start, visited, new_component);
 
@@ -249,7 +250,7 @@ void Graph::set_adjacency_list(Node& n) {
 	}
 }
 
-void Graph::dfs_selections(const Node* node, Board<bool>& visited, Component& connected) {
+void Graph::dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected) {
 	// Performs a depth-first-search, recursively building a vector of adjacent nodes with the same value.
 	visited.set(node->m_coord, true);
 

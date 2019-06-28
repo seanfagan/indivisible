@@ -1,5 +1,4 @@
 #include "Coordinate.h"
-#include "Component.h"
 #include "Board.h"
 #include "Graph.h"
 
