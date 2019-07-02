@@ -60,7 +60,7 @@ void Graph::print() const {
 					for (auto& neigh : n.m_adjacents) {
 						// find vertical neighbor
 						if (neigh->m_coord.y < n.m_coord.y) {
-							connected = (neigh->m_selection == n.m_selection);
+							connected = (neigh->m_grouping == n.m_grouping);
 						}
 					}
 
@@ -80,7 +80,7 @@ void Graph::print() const {
 					for (auto& neigh : n.m_adjacents) {
 						// find horizontal neighbor
 						if (neigh->m_coord.x > n.m_coord.x) {
-							connected = (neigh->m_selection == n.m_selection);
+							connected = (neigh->m_grouping == n.m_grouping);
 						}
 					}
 					body += (connected ? " " : "|");
@@ -112,62 +112,50 @@ void Graph::print() const {
 }
 
 bool Graph::input_selection(const std::vector<Coordinate>& coords) {
-	// Create a backup of current selections, in case validation fails
-	Board<int> temp_selections(0);
-	for (const auto& n : nodes) {
-		for (const auto& m : n) {
-			temp_selections.set(m.m_coord, m.m_selection);
-		}
-	}
-
-	// Add 1 to graph's selection history
-	for (auto& row : nodes) {
-		for (auto& node : row) {
-			if (node.m_selection > 0) {
-				node.m_selection++;
-			}
-		}
-	}
+	bool valid = true;
+	std::shared_ptr<Grouping> new_grouping = std::make_shared<Grouping>();
 
 	// Validate the input coordinates
-	bool valid = true;
-	{ 
+	{
 		// check that inputs are within board size
 		for (const Coordinate& c : coords) {
 			if (c.x < 0 || c.x >= nodes.size() || c.y < 0 || c.y >= nodes.size()) {
 				std::cout << "[x] Illegal! " << c << " is outside the valid range." << std::endl;
 				valid = false;
-				goto stop; // !!! exit
+				goto stop; // !!! GOTO stop
 			}
 		}
 
-		// add new selection to graph
+		// check that nodes are not already selected
 		for (const Coordinate& c : coords) {
 			Node& n = nodes[c.y][c.x];
-
-			// check that node is not already selected
-			if (n.m_selection != 0) {
+			if (n.m_grouping != NULL) {
 				std::cout << "[x] Illegal! " << c << " has already been selected." << std::endl;
 				valid = false;
-				goto stop;  // !!! exit
+				goto stop;  // !!! GOTO stop
 			}
-			n.m_selection = 1;
 		}
+
+		// create grouping from selected nodes
+		std::vector<Node*> grouped_nodes;
+		for (const Coordinate& c : coords) {
+			grouped_nodes.push_back(&nodes[c.y][c.x]);
+		}
+		new_grouping->add_nodes(grouped_nodes);  // modifies nodes!
 
 		// run depth-first-search to find connected components
 		std::vector<std::vector<const Node*>> components = get_selections();
 
-		// utilize components for error checking
+		// use connected components for further error checking
 		for (const auto& c : components)
 		{
-			// std::cout << "Selection: " << c.root()->m_selection << " | Root: " << c.root()->m_coord.x << "," << c.root()->m_coord.y << " | Size: " << c.size() << std::endl;
-			if (c.front()->m_selection == 0 && c.size() < SIZE) {
+			if (c.front()->m_grouping == NULL && c.size() < SIZE) {
 				// Case: Unselected area is too small for a valid selection.
 				valid = false;
 				std::cout << "[x] Illegal! This would create a pocket too small to be selected." << std::endl;
 			}
-			else if (c.front()->m_selection != 0 && c.size() != SIZE) {
-				// Case: Selection is too small.
+			else if (c.front()->m_grouping != NULL && c.size() != SIZE) {
+				// Case: Selection is wrong size.
 				valid = false;
 				std::cout << "[x] Illegal! Every selection must be " << SIZE << " tiles." << std::endl;
 			}
@@ -175,13 +163,9 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 	}
 	stop:  // !!! GOTO label
 
-	if (!valid) {
-		// revert graph's selections back to snapshot
-		for (int y = 0; y < nodes.size(); ++y) {
-			for (int x = 0; x < nodes.size(); ++x) {
-				nodes[y][x].m_selection = temp_selections.get(x, y);
-			}
-		}
+	if (valid) {
+		// todo: document what's going on here with the shared pointers.
+		groupings.push_back(new_grouping);
 	}
 
 	return valid;
@@ -255,7 +239,7 @@ void Graph::dfs_selections(const Node* node, Board<bool>& visited, std::vector<c
 	visited.set(node->m_coord, true);
 
 	for (const Node* adj : node->m_adjacents) {
-		if (!visited.get(adj->m_coord) && node->m_selection == adj->m_selection) {
+		if (!visited.get(adj->m_coord) && node->m_grouping == adj->m_grouping) {
 			connected.push_back(adj);  // add node to connected component
 			dfs_selections(adj, visited, connected);
 		}

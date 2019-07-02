@@ -117,12 +117,14 @@
   <ItemGroup>
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="Grouping.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="Grouping.h" />
     <ClInclude Include="Node.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

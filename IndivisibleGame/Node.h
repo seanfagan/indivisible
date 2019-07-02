@@ -2,6 +2,8 @@
 #include "Coordinate.h"
 #include <vector>
 
+class Grouping;  // forward declaration
+
 struct Node {
 	enum Party : char {
 		A, B
@@ -11,5 +13,5 @@ struct Node {
 	Party m_party;
 	int m_population = 0;
 	std::vector<const Node*> m_adjacents;
-	int m_selection = 0;
+	const Grouping* m_grouping = NULL;
 };

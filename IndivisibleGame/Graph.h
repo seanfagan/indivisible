@@ -1,8 +1,10 @@
 #pragma once
 #include "Board.h"
 #include "Node.h"
-#include <vector>
+#include "Grouping.h"
 #include <array>
+#include <memory>
+#include <vector>
 #define SIZE 5 // todo
 
 class Graph {
@@ -16,6 +18,7 @@ public:
 
 private:
 	std::array<std::array<Node, SIZE>, SIZE> nodes;
+	std::vector<std::shared_ptr<Grouping>> groupings;
 
 	void initialize(const int& seed);
 	void set_adjacency_list(Node& n);
