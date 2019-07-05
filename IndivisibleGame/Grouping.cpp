@@ -37,3 +37,24 @@ std::map<Node::Party, int> Grouping::get_votes() const {
 	}
 	return votes;
 }
+
+std::pair<Node::Party, int> Grouping::get_winner() const {
+	std::map<Node::Party, int> votes = get_votes();
+	Node::Party winner_party;
+	int winner_votes;
+
+	if (votes[Node::A] > votes[Node::B]) {
+		winner_party = Node::A;
+		winner_votes = votes[Node::A];
+	}
+	else if (votes[Node::B] > votes[Node::A]) {
+		winner_party = Node::B;
+		winner_votes = votes[Node::B];
+	}
+	else {
+		// tie
+		winner_party = Node::unknown;
+		winner_votes = votes[Node::A];
+	}
+	return std::pair<Node::Party, int>(winner_party, winner_votes);
+}
