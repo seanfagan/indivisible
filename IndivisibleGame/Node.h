@@ -5,8 +5,10 @@
 class Grouping;  // forward declaration
 
 struct Node {
-	enum Party : char {
-		A, B
+	enum Party {
+		unknown = 0,
+		A,
+		B,
 	};
 
 	Coordinate m_coord;
