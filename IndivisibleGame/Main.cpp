@@ -91,13 +91,21 @@ int main()
 		std::getline(std::cin, input);
 		std::vector<Coordinate> selection = parse_selection(input);
 
+		// apply input to graph
 		bool success = g.input_selection(selection);
 		if (!success) {
 			std::cout << "[!] Your selection was not applied." << std::endl;
-			// revert graph's selections back to snapshot
+			continue;
 		}
-		else {
-			std::cout << "[+] District created!" << std::endl;
+		std::cout << "[+] District created!" << std::endl;
+
+		// display info on new grouping
+		std::weak_ptr<const Grouping> weak_group = g.get_last_grouping();
+		std::shared_ptr<const Grouping> group = weak_group.lock();
+		if (group) {
+			int p = group->get_population();
+			std::pair<Node::Party, int> winner = group->get_winner();
+			std::cout << "[i] Party " << winner.first << " wins with " << winner.second << " votes!" << std::endl;
 		}
 	}
 

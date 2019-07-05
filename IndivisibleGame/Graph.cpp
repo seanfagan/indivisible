@@ -14,6 +14,20 @@ const Node* Graph::get_node(const int& x, const int& y) const {
 	return &nodes[y][x];
 }
 
+std::vector<std::weak_ptr<const Grouping>> Graph::get_groupings() const {
+	std::vector<std::weak_ptr<const Grouping>> gs;
+	for (const auto& g : groupings) {
+		std::weak_ptr<const Grouping> ga = g;
+		gs.push_back(ga);
+	}
+	return gs;
+}
+
+std::weak_ptr<const Grouping> Graph::get_last_grouping() const {
+	std::weak_ptr<const Grouping> g = groupings.back();
+	return g;
+}
+
 void Graph::print() const {
 	std::string indent = "   ";
 	std::string hr = "+-----";
@@ -204,7 +218,7 @@ void Graph::initialize(const int& seed) {
 			Node& n = nodes[y][x];
 			// Set initial values
 			n.m_coord = Coordinate(x, y);
-			n.m_party = static_cast<Node::Party>(rando() % 2);
+			n.m_party = static_cast<Node::Party>(rando() % 2 + 1);
 			n.m_population = rando() % 3 + 1;
 			set_adjacency_list(n);
 		}

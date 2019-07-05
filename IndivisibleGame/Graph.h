@@ -14,6 +14,8 @@ public:
 	bool input_selection(const std::vector<Coordinate>& coords);
 	const Node* get_node(const Coordinate& coord) const;
 	const Node* get_node(const int& x, const int& y) const;
+	std::vector<std::weak_ptr<const Grouping>> get_groupings() const;
+	std::weak_ptr<const Grouping> get_last_grouping() const;
 	void print() const;  // debug
 
 private:
