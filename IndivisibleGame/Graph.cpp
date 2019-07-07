@@ -28,6 +28,16 @@ std::weak_ptr<const Grouping> Graph::get_last_grouping() const {
 	return g;
 }
 
+bool Graph::is_complete() const {
+	std::vector<std::vector<const Node*>> selections = get_selections();
+	for (const std::vector<const Node*>& s : selections) {
+		if (s.front()->m_grouping == NULL) {
+			return false;
+		}
+	}
+	return true;
+}
+
 void Graph::print() const {
 	std::string indent = "   ";
 	std::string hr = "+-----";
@@ -185,7 +195,7 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 	return valid;
 }
 
-std::vector<std::vector<const Node*>> Graph::get_selections() {
+std::vector<std::vector<const Node*>> Graph::get_selections() const {
 	Board<bool> visited(0);
 	std::vector<std::vector<const Node*>> components;
 
@@ -248,7 +258,7 @@ void Graph::set_adjacency_list(Node& n) {
 	}
 }
 
-void Graph::dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected) {
+void Graph::dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected) const {
 	// Performs a depth-first-search, recursively building a vector of adjacent nodes with the same value.
 	visited.set(node->m_coord, true);
 

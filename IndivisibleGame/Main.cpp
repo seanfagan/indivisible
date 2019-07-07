@@ -16,14 +16,6 @@
 #define SIZE 5
 using adjboard = std::array<std::array<std::vector<Coordinate>, SIZE>, SIZE>;
 
-Board<int> ARR({ {
-	{2, 2, 0, 1, 1},
-	{2, 2, 0, 0, 1},
-	{0, 2, 0, 0, 1},
-	{0, 5, 0, 0, 1},
-	{0, 5, 0, 0, 0},
-} });
-
 /** User input */
 bool is_invalid_char(const char& ch)
 {
@@ -106,6 +98,11 @@ int main()
 			int p = group->get_population();
 			std::pair<Node::Party, int> winner = group->get_winner();
 			std::cout << "[i] Party " << winner.first << " wins with " << winner.second << " votes!" << std::endl;
+		}
+
+		if (g.is_complete()) {
+			std::cout << "Game over!" << std::endl;
+			break;
 		}
 	}
 
