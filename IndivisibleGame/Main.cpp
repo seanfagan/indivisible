@@ -70,7 +70,7 @@ int main()
 	std::cout << "Hi world." << std::endl;
 
 	// create graph
-	Graph g(123);
+	Graph g(1234);
 
 	std::cout << std::endl;
 
@@ -89,15 +89,20 @@ int main()
 			std::cout << "[!] Your selection was not applied." << std::endl;
 			continue;
 		}
-		std::cout << "[+] District created!" << std::endl;
+		std::cout << "[+] District created! ";
 
 		// display info on new grouping
 		std::weak_ptr<const Grouping> weak_group = g.get_last_grouping();
 		std::shared_ptr<const Grouping> group = weak_group.lock();
 		if (group) {
 			int p = group->get_population();
-			std::pair<Node::Party, int> winner = group->get_winner();
-			std::cout << "[i] Party " << winner.first << " wins with " << winner.second << " votes!" << std::endl;
+			std::map<Node::Party, int> votes = group->get_votes();
+			Node::Party winner = Grouping::get_winner(votes);
+
+			if (winner == Node::Party::A) { std::cout << "A's"; }
+			else if (winner == Node::Party::B) { std::cout << "B's"; }
+			else { std::cout << "Neither"; }
+			std::cout << " Party wins the district!" << std::endl;
 		}
 
 		if (g.is_complete()) {
