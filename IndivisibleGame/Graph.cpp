@@ -39,6 +39,7 @@ bool Graph::is_complete() const {
 }
 
 void Graph::print() const {
+	// todo: ties
 	std::string indent = "   ";
 	std::string hr = "+-----";
 	std::string vr = "|";
@@ -75,8 +76,13 @@ void Graph::print() const {
 				
 				// build body
 				if (ln == 1) {
-					// print the population
-					body += "  " + std::to_string(n.m_population) + "  ";
+					// middle line
+					if (n.m_grouping == NULL) {
+						body += "  " + std::to_string(n.m_population) + "  ";
+					}
+					else {
+						body += (n.m_grouping->get_winner() == Node::Party::A ? party_a : party_b);
+					}
 				}
 				else if (ln == 3) {
 					// print the separators
@@ -91,8 +97,13 @@ void Graph::print() const {
 					body += (connected ? "     " : "-----");
 				}
 				else {
-					// print the party
-					body += (n.m_party == Node::Party::A ? party_a : party_b);
+					// other lines
+					if (n.m_grouping == NULL) {
+						body += (n.m_party == Node::Party::A ? party_a : party_b);
+					}
+					else {
+						body += (n.m_grouping->get_winner() == Node::Party::A ? party_a : party_b);
+					}
 				}
 
 				// build suffix
