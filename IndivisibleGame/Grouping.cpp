@@ -31,6 +31,7 @@ int Grouping::get_population() const {
 }
 
 std::map<Node::Party, int> Grouping::get_votes() const {
+	// tally votes
 	std::map<Node::Party, int> votes;
 	for (const auto& n : m_nodes) {
 		votes[n->m_party] += n->m_population;
@@ -38,23 +39,22 @@ std::map<Node::Party, int> Grouping::get_votes() const {
 	return votes;
 }
 
-std::pair<Node::Party, int> Grouping::get_winner() const {
+Node::Party Grouping::get_winner() const {
+	// warning: will retally votes
 	std::map<Node::Party, int> votes = get_votes();
-	Node::Party winner_party;
-	int winner_votes;
+	return Grouping::get_winner(votes);
+}
 
-	if (votes[Node::A] > votes[Node::B]) {
-		winner_party = Node::A;
-		winner_votes = votes[Node::A];
+// static
+Node::Party Grouping::get_winner(std::map<Node::Party, int> votes) {
+	// determine winner from votes
+	if (votes[Node::Party::A] > votes[Node::Party::B]) {
+		return Node::Party::A;
 	}
-	else if (votes[Node::B] > votes[Node::A]) {
-		winner_party = Node::B;
-		winner_votes = votes[Node::B];
+	else if (votes[Node::Party::B] > votes[Node::Party::A]) {
+		return Node::Party::B;
 	}
 	else {
-		// tie
-		winner_party = Node::unknown;
-		winner_votes = votes[Node::A];
+		return Node::Party::unknown;  // tie
 	}
-	return std::pair<Node::Party, int>(winner_party, winner_votes);
 }

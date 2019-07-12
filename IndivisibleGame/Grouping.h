@@ -12,7 +12,9 @@ public:
 	void add_nodes(std::vector<Node*> nodes);
 	int get_population() const;
 	std::map<Node::Party, int> get_votes() const;
-	std::pair<Node::Party, int> get_winner() const;
+	Node::Party get_winner() const;
+
+	static Node::Party get_winner(std::map<Node::Party, int> votes);
 private:
 	std::vector<Node*> m_nodes;
 };
