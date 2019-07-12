@@ -5,7 +5,7 @@
 class Grouping;  // forward declaration
 
 struct Node {
-	enum Party {
+	enum class Party {
 		unknown = 0,
 		A,
 		B,
