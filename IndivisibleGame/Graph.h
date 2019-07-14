@@ -17,7 +17,11 @@ public:
 	std::vector<std::weak_ptr<const Grouping>> get_groupings() const;
 	std::weak_ptr<const Grouping> get_last_grouping() const;
 	bool is_complete() const;
+	std::map<Node::Party, int> get_votes() const;
+	Node::Party get_winner() const;
 	void print() const;  // debug
+
+	static Node::Party get_winner(std::map<Node::Party, int>& votes);
 
 private:
 	std::array<std::array<Node, SIZE>, SIZE> nodes;

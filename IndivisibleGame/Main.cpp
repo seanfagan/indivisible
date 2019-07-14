@@ -71,10 +71,9 @@ int main()
 
 	// create graph
 	Graph g(1234);
-
 	std::cout << std::endl;
 
-	for (int i = 0; i < 10; ++i) {
+	while (!g.is_complete()) {
 		g.print();
 
 		// get input
@@ -99,16 +98,37 @@ int main()
 			std::map<Node::Party, int> votes = group->get_votes();
 			Node::Party winner = Grouping::get_winner(votes);
 
-			if (winner == Node::Party::A) { std::cout << "A's"; }
-			else if (winner == Node::Party::B) { std::cout << "B's"; }
-			else { std::cout << "Neither"; }
-			std::cout << " Party wins the district!" << std::endl;
+			if (winner == Node::Party::A) {
+				std::cout <<
+					"District created! The 'A' Party wins the district, "
+					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
+			}
+			else if (winner == Node::Party::B) {
+				std::cout <<
+					"District created! The 'B' Party wins the district, "
+					<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
+			}
+			else {
+				std::cout <<
+					"Swing district created! Polling is tied, "
+					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
+			}
+			std::cout << std::endl;
 		}
-
-		if (g.is_complete()) {
-			std::cout << "Game over!" << std::endl;
-			break;
+	}
+	if (g.is_complete()) {
+		std::cout << "Game over!" << std::endl;
+		std::map<Node::Party, int> votes = g.get_votes();
+		Node::Party winner = Graph::get_winner(votes);
+		if (winner == Node::Party::A) {
+			std::cout << "The 'A' Party wins, "
+				<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
 		}
+		else {
+			std::cout << "The 'B' Party wins, "
+				<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
+		}
+		std::cout << std::endl;
 	}
 
 	std::cout << "End" << std::endl;
