@@ -30,4 +30,5 @@ private:
 	void initialize(const int& seed);
 	void set_adjacency_list(Node& n);
 	void dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected) const;
+	std::vector<std::string> print_node(const Node& n) const;
 };

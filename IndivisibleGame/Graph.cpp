@@ -69,108 +69,38 @@ Node::Party Graph::get_winner() const {
 }
 
 void Graph::print() const {
-	// todo: ties
-	std::string indent = "   ";
-	std::string hr = "+-----";
-	std::string vr = "|";
-	std::string party_a = " ... ";
-	std::string party_b = " ~~~ ";
-	std::string party_tie = "     ";
-
 	// top line
-	std::cout << indent;
+	std::cout << "   ";
 	for (int i = 0; i < nodes.size(); ++i) {
-		std::cout << hr;
+		std::cout << "+-----";
 	}
 	std::cout << "+" << std::endl;
 
-	// reverse iterate through rows
+	// iterate through node rows in reverse (max to min)
 	for (int row = nodes.size() - 1; row >= 0; --row) {
-		for (int ln = 0; ln < 4; ++ln) {
-			std::string prefix = "";  // 4 chars
-			std::string body = "";  // 5 chars + 1 separator char
-
-			// build prefix
-			if (ln == 1) {
-				prefix += std::to_string(row + 1) + "  |";
+		// construct this row's lines of text, node by node
+		std::vector<std::string> row_lines(4);
+		for (int col = 0; col < nodes.size(); ++col) {
+			const Node& n = nodes[row][col];
+			std::vector<std::string> node_lines = print_node(n);
+			for (int i = 0; i < node_lines.size(); ++i) {
+				row_lines[i] += node_lines[i];
 			}
-			else if (ln == 3) {
-				prefix += "   +";
-			}
-			else {
-				prefix += "   |";
-			}
+		}
 
-			// iterate through columns
-			for (int col = 0; col < nodes.size(); ++col) {
-				const Node& n = nodes[row][col];
-				
-				// build body
-				if (ln == 1) {
-					// middle line
-					if (n.m_grouping == NULL) {
-						body += "  " + std::to_string(n.m_population) + "  ";
-					}
-					else {
-						const Node::Party& w = n.m_grouping->get_winner();
-						if (w == Node::Party::A) {
-							body += party_a;
-						}
-						else if (w == Node::Party::B) {
-							body += party_b;
-						}
-						else {
-							body += party_tie;
-						}
-					}
-				}
-				else if (ln == 3) {
-					// print the separators
-					bool connected = false;
-					for (auto& neigh : n.m_adjacents) {
-						// find vertical neighbor
-						if (neigh->m_coord.y < n.m_coord.y) {
-							connected = (neigh->m_grouping == n.m_grouping);
-						}
-					}
-
-					body += (connected ? "     " : "-----");
-				}
-				else {
-					// other lines
-					if (n.m_grouping == NULL) {
-						body += (n.m_party == Node::Party::A ? party_a : party_b);
-					}
-					else {
-						const Node::Party& w = n.m_grouping->get_winner();
-						if (w == Node::Party::A) {
-							body += party_a;
-						}
-						else if (w == Node::Party::B) {
-							body += party_b;
-						}
-						else {
-							body += party_tie;
-						}
-					}
-				}
-
-				// build suffix
-				if (ln == 3) {
-					body += "+";
-				}
-				else {
-					bool connected = false;
-					for (auto& neigh : n.m_adjacents) {
-						// find horizontal neighbor
-						if (neigh->m_coord.x > n.m_coord.x) {
-							connected = (neigh->m_grouping == n.m_grouping);
-						}
-					}
-					body += (connected ? " " : "|");
-				}
+		// print row, line by line
+		for (int i = 0; i < row_lines.size(); ++i) {
+			// print prefix
+			switch (i) {
+				case 1:
+					std::cout << std::to_string(row + 1) + "  |";
+					break;
+				case 3:
+					std::cout << "   +";
+					break;
+				default: std::cout << "   |";
 			}
-			std::cout << prefix << body << std::endl;
+			std::cout << row_lines[i] << std::endl;  // print line
 		}
 	}
 
@@ -181,18 +111,53 @@ void Graph::print() const {
 		std::cout << "  " << std::string{ index } + "   ";
 	}
 	std::cout << std::endl;
+}
 
+std::vector<std::string> Graph::print_node(const Node& n) const {
+	std::map<Node::Party, std::string> party = {
+		{Node::Party::A, " ... "},
+		{Node::Party::B, " ~~~ "},
+		{Node::Party::unknown, "     "},
 
-	/*
-	// old print
-	for (int y = 0; y < nodes.size(); ++y) {
-		for (int x = 0; x < nodes.size(); ++x) {
-			const Node* n = get_node(x, y);
-			std::cout << "| " << n->m_selection << " |";
+	};
+	std::string middle_ln;
+	std::string filler_ln;
+	{
+		if (n.m_grouping == NULL) {
+			middle_ln = "  " + std::to_string(n.m_population) + "  ";
+			filler_ln = party[n.m_party];
 		}
-		std::cout << std::endl;
+		else {
+			const Node::Party& w = n.m_grouping->get_winner();
+			middle_ln = party[w];
+			filler_ln = party[Node::Party::unknown];
+		}
+		// add suffix
+		bool connected = false;
+		for (auto& neigh : n.m_adjacents) {
+			// find eastern neighbor
+			if (neigh->m_coord.x > n.m_coord.x) {
+				connected = (neigh->m_grouping == n.m_grouping);
+			}
+		}
+		middle_ln += (connected ? " " : "|");
+		filler_ln += (connected ? " " : "|");
 	}
-	*/
+	std::string bottom_ln;
+	{
+		// print the separators
+		bool connected = false;
+		for (auto& neigh : n.m_adjacents) {
+			// find vertical neighbor
+			if (neigh->m_coord.y < n.m_coord.y) {
+				connected = (neigh->m_grouping == n.m_grouping);
+			}
+		}
+		bottom_ln = (connected ? "     " : "-----");
+		bottom_ln += "+";
+	}
+	std::vector<std::string> lines{ filler_ln, middle_ln, filler_ln, bottom_ln };
+	return lines;
 }
 
 bool Graph::input_selection(const std::vector<Coordinate>& coords) {
