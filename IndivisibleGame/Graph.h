@@ -12,11 +12,13 @@ public:
 	Graph(const int& seed);
 	std::vector<std::vector<const Node*>> get_selections() const;
 	bool input_selection(const std::vector<Coordinate>& coords);
+	void undo_grouping();
 	const Node* get_node(const Coordinate& coord) const;
 	const Node* get_node(const int& x, const int& y) const;
 	std::vector<std::weak_ptr<const Grouping>> get_groupings() const;
 	std::weak_ptr<const Grouping> get_last_grouping() const;
 	bool is_complete() const;
+	std::map<Node::Party, int> survey_voters() const;
 	std::map<Node::Party, int> get_votes() const;
 	Node::Party get_winner() const;
 	void print() const;  // debug

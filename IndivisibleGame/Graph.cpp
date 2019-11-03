@@ -38,11 +38,25 @@ bool Graph::is_complete() const {
 	return true;
 }
 
+std::map<Node::Party, int> Graph::survey_voters() const {
+	// Get the votes for each party from the initial population
+	std::map<Node::Party, int> voters;
+
+	// for every node
+	for (int y = 0; y < nodes.size(); ++y) {
+		for (int x = 0; x < nodes[0].size(); ++x) {
+			const Node& n = nodes[y][x];
+			voters[n.m_party] += n.m_population;
+		}
+	}
+	return voters;
+}
+
 std::map<Node::Party, int> Graph::get_votes() const {
 	// tally votes
 	std::map<Node::Party, int> votes;
 	for (const auto& g : groupings) {
-		auto winner = g->get_winner();
+		Node::Party winner = g->get_winner();
 
 		// resolve any ties
 		if (winner == Node::Party::unknown) {
@@ -218,6 +232,16 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 	}
 
 	return valid;
+}
+
+void Graph::undo_grouping() {
+	if (groupings.empty()) {
+		std::cout << "[i] Nothing to undo my friend." << std::endl;
+	}
+	else {
+		groupings.pop_back();
+		std::cout << "[i] Last grouping undone." << std::endl;
+	}
 }
 
 std::vector<std::vector<const Node*>> Graph::get_selections() const {
