@@ -65,31 +65,12 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 	return result;
 }
 
-int main()
-{
-	std::cout << "Hi world." << std::endl;
+void apply_selection(Graph& g, const std::string& input) {
+	std::vector<Coordinate> selection = parse_selection(input);
 
-	// create graph
-	Graph g(1234);
-	std::cout << std::endl;
-
-	while (!g.is_complete()) {
-		g.print();
-
-		// get input
-		std::cout << "~~~ Input your selection ~~~" << std::endl;
-		std::string input;
-		std::getline(std::cin, input);
-		std::vector<Coordinate> selection = parse_selection(input);
-
-		// apply input to graph
-		bool success = g.input_selection(selection);
-		if (!success) {
-			std::cout << "[!] Your selection was not applied." << std::endl;
-			continue;
-		}
-		std::cout << "[+] District created! ";
-
+	// apply input to graph
+	bool success = g.input_selection(selection);
+	if (success) {
 		// display info on new grouping
 		std::weak_ptr<const Grouping> weak_group = g.get_last_grouping();
 		std::shared_ptr<const Grouping> group = weak_group.lock();
@@ -100,35 +81,81 @@ int main()
 
 			if (winner == Node::Party::A) {
 				std::cout <<
-					"District created! The 'A' Party wins the district, "
+					"[!] District created! Party A wins the district, "
 					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
 			}
 			else if (winner == Node::Party::B) {
 				std::cout <<
-					"District created! The 'B' Party wins the district, "
+					"[!] District created! Party B wins the district, "
 					<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
 			}
 			else {
 				std::cout <<
-					"Swing district created! Polling is tied, "
+					"[!] Swing district created! Polling is tied, "
 					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
 			}
 			std::cout << std::endl;
 		}
 	}
-	if (g.is_complete()) {
-		std::cout << "Game over!" << std::endl;
+	else {
+		// failed to apply selection
+		std::cout << "[x] Your selection was not applied." << std::endl;
+	}
+}
+
+int main()
+{
+	// todo: win state
+	// todo: cleanup main.cpp
+	// todo: messenger
+	std::string play = "Y";
+
+	while (play == "Y") {
+		// create graph
+		Graph g(1234);
+
+		// survey voters
+		std::map<Node::Party, int> survey = g.survey_voters();
+		std::cout << "[i] Party A has " << survey[Node::Party::A] << " supporters." << std::endl;
+		std::cout << "[i] Party B has " << survey[Node::Party::B] << " supporters." << std::endl;
+		std::cout << std::endl;
+
+		while (!g.is_complete()) {
+			g.print();
+
+			// get input
+			std::cout << "   +--= Input your selection =--+" << std::endl;
+			std::cout << ">> ";
+			std::string input;
+			std::getline(std::cin, input);
+			std::cout << std::endl;
+
+			if (input == "undo") {
+				g.undo_grouping();
+			}
+			else {
+				apply_selection(g, input);
+			}
+		}
+		// graph has been completed
+		std::cout << "[i] Area complete!" << std::endl;
+
+		// get winner of graph
 		std::map<Node::Party, int> votes = g.get_votes();
 		Node::Party winner = Graph::get_winner(votes);
 		if (winner == Node::Party::A) {
-			std::cout << "The 'A' Party wins, "
+			std::cout << "[! ]Party A wins, "
 				<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
 		}
 		else {
-			std::cout << "The 'B' Party wins, "
+			std::cout << "[!] Party B wins, "
 				<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
 		}
 		std::cout << std::endl;
+
+		std::cout << "Enter 'Y' to play again" << std::endl;
+		std::cout << ">> ";
+		std::getline(std::cin, play);
 	}
 
 	std::cout << "End" << std::endl;
