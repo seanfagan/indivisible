@@ -279,6 +279,16 @@ void Graph::undo_grouping() {
 	}
 }
 
+void Graph::clear_groupings() {
+	if (groupings.empty()) {
+		std::cout << "[i] Nothing to reset." << std::endl;
+	}
+	else {
+		groupings.clear();
+		std::cout << "[i] All groupings cleared." << std::endl;
+	}
+}
+
 std::vector<std::vector<const Node*>> Graph::get_selections() const {
 	Board<bool> visited(0);
 	std::vector<std::vector<const Node*>> components;

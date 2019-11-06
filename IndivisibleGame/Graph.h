@@ -13,6 +13,7 @@ public:
 	std::vector<std::vector<const Node*>> get_selections() const;
 	void input_selection(const std::vector<Coordinate>& coords);
 	void undo_grouping();
+	void clear_groupings();
 	const Node* get_node(const Coordinate& coord) const;
 	const Node* get_node(const int& x, const int& y) const;
 	std::vector<std::weak_ptr<const Grouping>> get_groupings() const;

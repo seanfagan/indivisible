@@ -95,6 +95,9 @@ int main()
 			if (input == "undo") {
 				g.undo_grouping();
 			}
+			else if (input == "restart" || input == "reset" || input == "clear") {
+				g.clear_groupings();
+			}
 			else {
 				std::vector<Coordinate> selection = parse_selection(input);
 				g.input_selection(selection);
