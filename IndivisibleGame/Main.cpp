@@ -67,25 +67,30 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 
 int main()
 {
-	// todo: win state
+	// todo: smart graph generation
 	// todo: cleanup main.cpp
-	// todo: messenger
+	// todo: messenger?
 	std::string play = "Y";
 
-	while (play == "Y") {
+	while (play == "Y" || play == "y") {
 		// create graph
 		Graph g(1234);
 
-		// survey voters
+		// survey voters and find underdog
 		std::map<Node::Party, int> survey = g.survey_voters();
-		std::cout << "[i] Party A has " << survey[Node::Party::A] << " supporters." << std::endl;
-		std::cout << "[i] Party B has " << survey[Node::Party::B] << " supporters." << std::endl;
+		int pop_a = survey[Node::Party::A];
+		int pop_b = survey[Node::Party::B];
+		Node::Party underdog = pop_a <= pop_b ? Node::Party::A : Node::Party::B;
+
+		// print details
+		std::cout << "[i] Party A has " << pop_a << " supporters. Party B has " << pop_b << " supporters." << std::endl;
+		std::cout << "[Obj] Divide the people so that Party " << (underdog == Node::Party::A ? "A" : "B") << " wins!" << std::endl;
 		std::cout << std::endl;
 
 		while (!g.is_complete()) {
 			g.print();
 
-			// get input
+			// prompt: get input
 			std::cout << "   +--= Input your selection =--+" << std::endl;
 			std::cout << ">> ";
 			std::string input;
@@ -104,21 +109,30 @@ int main()
 			}
 		}
 		// graph has been completed
-		std::cout << "[i] Area complete!" << std::endl;
+		std::cout << "[!] Graph complete!" << std::endl;
 
 		// get winner of graph
 		std::map<Node::Party, int> votes = g.get_votes();
 		Node::Party winner = Graph::get_winner(votes);
+
+		//print winner
 		if (winner == Node::Party::A) {
-			std::cout << "[! ]Party A wins, "
-				<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
+			std::cout << "[!] Party A wins, " << votes[Node::Party::A] << " to " << votes[Node::Party::B];
 		}
 		else {
-			std::cout << "[!] Party B wins, "
-				<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
+			std::cout << "[!] Party B wins, " << votes[Node::Party::B] << " to " << votes[Node::Party::A];
 		}
 		std::cout << std::endl;
 
+		// did player succeed
+		if (winner == underdog) {
+			std::cout << "Success! The party with less supporters won! A true underdog story." << std::endl;
+		}
+		else {
+			std::cout << "Failure... The party with the most supporters actually won..." << std::endl;
+		}
+
+		// prompt: play again?
 		std::cout << "Enter 'Y' to play again" << std::endl;
 		std::cout << ">> ";
 		std::getline(std::cin, play);
