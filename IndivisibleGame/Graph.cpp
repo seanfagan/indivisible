@@ -174,7 +174,7 @@ std::vector<std::string> Graph::print_node(const Node& n) const {
 	return lines;
 }
 
-bool Graph::input_selection(const std::vector<Coordinate>& coords) {
+void Graph::input_selection(const std::vector<Coordinate>& coords) {
 	bool valid = true;
 	std::shared_ptr<Grouping> new_grouping = std::make_shared<Grouping>();
 
@@ -185,7 +185,7 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 			if (c.x < 0 || c.x >= nodes.size() || c.y < 0 || c.y >= nodes.size()) {
 				std::cout << "[x] Illegal! " << c << " is outside the valid range." << std::endl;
 				valid = false;
-				goto stop; // !!! GOTO stop
+				goto stop; // !!! GOTO
 			}
 		}
 
@@ -195,7 +195,7 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 			if (n.m_grouping != NULL) {
 				std::cout << "[x] Illegal! " << c << " has already been selected." << std::endl;
 				valid = false;
-				goto stop;  // !!! GOTO stop
+				goto stop;  // !!! GOTO
 			}
 		}
 
@@ -227,11 +227,46 @@ bool Graph::input_selection(const std::vector<Coordinate>& coords) {
 	stop:  // !!! GOTO label
 
 	if (valid) {
-		// todo: document what's going on here with the shared pointers.
+		// To save the new Grouping, push a shared pointer of it to the Graph.
+		// The grouping will exist so long as at least one shared pointer exists.
 		groupings.push_back(new_grouping);
 	}
 
-	return valid;
+	print_selection_results(valid);
+}
+
+void Graph::print_selection_results(const bool& success) {
+	if (success) {
+		// display info on new grouping
+		std::weak_ptr<const Grouping> weak_group = groupings.back();
+		std::shared_ptr<const Grouping> group = weak_group.lock();
+		if (group) {
+			int p = group->get_population();
+			std::map<Node::Party, int> votes = group->get_votes();
+			Node::Party winner = Grouping::get_winner(votes);
+
+			if (winner == Node::Party::A) {
+				std::cout <<
+					"[!] District created! Party A wins the district, "
+					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
+			}
+			else if (winner == Node::Party::B) {
+				std::cout <<
+					"[!] District created! Party B wins the district, "
+					<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
+			}
+			else {
+				std::cout <<
+					"[!] Swing district created! Polling is tied, "
+					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
+			}
+			std::cout << std::endl;
+		}
+	}
+	else {
+		// failed to apply selection
+		std::cout << "[x] Your selection was not applied." << std::endl;
+	}
 }
 
 void Graph::undo_grouping() {

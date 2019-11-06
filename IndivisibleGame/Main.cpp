@@ -65,44 +65,6 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 	return result;
 }
 
-void apply_selection(Graph& g, const std::string& input) {
-	std::vector<Coordinate> selection = parse_selection(input);
-
-	// apply input to graph
-	bool success = g.input_selection(selection);
-	if (success) {
-		// display info on new grouping
-		std::weak_ptr<const Grouping> weak_group = g.get_last_grouping();
-		std::shared_ptr<const Grouping> group = weak_group.lock();
-		if (group) {
-			int p = group->get_population();
-			std::map<Node::Party, int> votes = group->get_votes();
-			Node::Party winner = Grouping::get_winner(votes);
-
-			if (winner == Node::Party::A) {
-				std::cout <<
-					"[!] District created! Party A wins the district, "
-					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
-			}
-			else if (winner == Node::Party::B) {
-				std::cout <<
-					"[!] District created! Party B wins the district, "
-					<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
-			}
-			else {
-				std::cout <<
-					"[!] Swing district created! Polling is tied, "
-					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
-			}
-			std::cout << std::endl;
-		}
-	}
-	else {
-		// failed to apply selection
-		std::cout << "[x] Your selection was not applied." << std::endl;
-	}
-}
-
 int main()
 {
 	// todo: win state
@@ -134,7 +96,8 @@ int main()
 				g.undo_grouping();
 			}
 			else {
-				apply_selection(g, input);
+				std::vector<Coordinate> selection = parse_selection(input);
+				g.input_selection(selection);
 			}
 		}
 		// graph has been completed

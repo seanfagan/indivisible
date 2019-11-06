@@ -11,7 +11,7 @@ class Graph {
 public:
 	Graph(const int& seed);
 	std::vector<std::vector<const Node*>> get_selections() const;
-	bool input_selection(const std::vector<Coordinate>& coords);
+	void input_selection(const std::vector<Coordinate>& coords);
 	void undo_grouping();
 	const Node* get_node(const Coordinate& coord) const;
 	const Node* get_node(const int& x, const int& y) const;
@@ -33,4 +33,5 @@ private:
 	void set_adjacency_list(Node& n);
 	void dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected) const;
 	std::vector<std::string> print_node(const Node& n) const;
+	void print_selection_results(const bool& success);
 };
