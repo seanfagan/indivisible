@@ -37,5 +37,5 @@ public:
 	}
 
 private:
-	std::array<std::array<T, 5>, 5> m_arr; // todo: size
+	std::array<std::array<T, 5>, 5> m_arr = {}; // todo: size
 };

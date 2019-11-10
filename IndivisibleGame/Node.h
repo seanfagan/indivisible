@@ -12,7 +12,7 @@ struct Node {
 	};
 
 	Coordinate m_coord;
-	Party m_party;
+	Party m_party = Party::unknown;
 	int m_population = 0;
 	std::vector<const Node*> m_adjacents;
 	const Grouping* m_grouping = NULL;

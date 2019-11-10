@@ -9,7 +9,7 @@
 
 class Graph {
 public:
-	Graph(const int& seed);
+	Graph();
 	std::vector<std::vector<const Node*>> get_selections() const;
 	void input_selection(const std::vector<Coordinate>& coords);
 	void undo_grouping();
@@ -30,7 +30,7 @@ private:
 	std::array<std::array<Node, SIZE>, SIZE> nodes;
 	std::vector<std::shared_ptr<Grouping>> groupings;
 
-	void initialize(const int& seed);
+	void initialize();
 	void set_adjacency_list(Node& n);
 	void dfs_selections(const Node* node, Board<bool>& visited, std::vector<const Node*>& connected) const;
 	std::vector<std::string> print_node(const Node& n) const;

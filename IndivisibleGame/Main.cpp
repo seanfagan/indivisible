@@ -67,14 +67,15 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 
 int main()
 {
-	// todo: smart graph generation
+	// todo: flyweight pattern parties
+	// todo: commands pattern interface
+	// todo: points system
 	// todo: cleanup main.cpp
-	// todo: messenger?
 	std::string play = "Y";
 
 	while (play == "Y" || play == "y") {
 		// create graph
-		Graph g(1234);
+		Graph g;
 
 		// survey voters and find underdog
 		std::map<Node::Party, int> survey = g.survey_voters();

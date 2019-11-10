@@ -2,8 +2,8 @@
 #include <random>
 #include <iostream>
 
-Graph::Graph(const int& seed) {
-	initialize(seed);
+Graph::Graph() {
+	initialize();
 }
 
 const Node* Graph::get_node(const Coordinate& coord) const {
@@ -311,10 +311,12 @@ std::vector<std::vector<const Node*>> Graph::get_selections() const {
 	return components;
 }
 
-void Graph::initialize(const int& seed) {
-	// Random generator
-	std::minstd_rand rando;
-	rando.seed(seed);
+void Graph::initialize() {
+	// Random number generators
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> d_party(1, 2);
+	std::discrete_distribution<> d_pop({ 6, 3, 1 });
 
 	// For every node
 	for (int y = 0; y < nodes.size(); ++y) {
@@ -322,9 +324,11 @@ void Graph::initialize(const int& seed) {
 			Node& n = nodes[y][x];
 			// Set initial values
 			n.m_coord = Coordinate(x, y);
-			n.m_party = static_cast<Node::Party>(rando() % 2 + 1);
-			n.m_population = rando() % 3 + 1;
 			set_adjacency_list(n);
+			// roll party
+			n.m_party = static_cast<Node::Party>(d_party(gen));
+			// roll population
+			n.m_population = d_pop(gen) + 1;
 		}
 	}
 }
