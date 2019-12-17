@@ -1,5 +1,6 @@
 #pragma once
 #include "Node.h"
+#include "Results.h"
 #include <map>
 #include <vector>
 
@@ -10,11 +11,7 @@ public:
 	~Grouping();
 
 	void add_nodes(std::vector<Node*> nodes);
-	int get_population() const;
-	std::map<Node::Party, int> get_votes() const;
-	Node::Party get_winner() const;
-
-	static Node::Party get_winner(std::map<Node::Party, int> votes);
+	Results get_results() const;
 private:
 	std::vector<Node*> m_nodes;
 };

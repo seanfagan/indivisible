@@ -1,6 +1,7 @@
 #include "Coordinate.h"
 #include "Board.h"
 #include "Graph.h"
+#include "Results.h"
 
 #include <algorithm>
 #include <array>
@@ -73,19 +74,32 @@ int main()
 	// todo: cleanup main.cpp
 	std::string play = "Y";
 
+	/*
+	Party a;
+	Party b;
+	std::unordered_map<Party*, int> ress;
+	ress[&a] = 5;
+	ress[&b] = 7;
+	Results abbba = Results(ress);
+	std::cout << "yesting";
+	*/
+
 	while (play == "Y" || play == "y") {
 		// create graph
 		Graph g;
+		Party const* party_a = g.get_party_a();
+		Party const* party_b = g.get_party_b();
 
 		// survey voters and find underdog
-		std::map<Node::Party, int> survey = g.survey_voters();
-		int pop_a = survey[Node::Party::A];
-		int pop_b = survey[Node::Party::B];
-		Node::Party underdog = pop_a <= pop_b ? Node::Party::A : Node::Party::B;
+		Results pop_results = g.get_popular_results();
+		int pop_a = pop_results.get_result(party_a);
+		int pop_b = pop_results.get_result(party_b);
+		Party const* underdog = pop_a <= pop_b ? party_a : party_b;
 
 		// print details
-		std::cout << "[i] Party A has " << pop_a << " supporters. Party B has " << pop_b << " supporters." << std::endl;
-		std::cout << "[Obj] Divide the people so that Party " << (underdog == Node::Party::A ? "A" : "B") << " wins!" << std::endl;
+		std::cout << "[i] " << party_a->m_name_plural << " has " << pop_a << " supporters. "
+			<< party_b->m_name_plural << " has " << pop_b << " supporters." << std::endl;
+		std::cout << "[!] Divide the people so that " << underdog->m_name_plural << " win!" << std::endl;
 		std::cout << std::endl;
 
 		while (!g.is_complete()) {
@@ -113,17 +127,19 @@ int main()
 		std::cout << "[!] Graph complete!" << std::endl;
 
 		// get winner of graph
-		std::map<Node::Party, int> votes = g.get_votes();
-		Node::Party winner = Graph::get_winner(votes);
+		Results results = g.get_results();
+		Party const* winner = results.get_winner();
 
 		//print winner
-		if (winner == Node::Party::A) {
-			std::cout << "[!] Party A wins, " << votes[Node::Party::A] << " to " << votes[Node::Party::B];
+		if (winner) {
+			std::cout << "[!] " << winner->m_name_plural << " win with " << results.get_result(winner)
+				<< " out of "  << results.get_total() << " votes." << std::endl;
 		}
 		else {
-			std::cout << "[!] Party B wins, " << votes[Node::Party::B] << " to " << votes[Node::Party::A];
+			// tie
+			std::cout << "[!] Tie...?" << std::endl; // todo
 		}
-		std::cout << std::endl;
+		
 
 		// did player succeed
 		if (winner == underdog) {

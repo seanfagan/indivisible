@@ -1,19 +1,14 @@
 #pragma once
 #include "Coordinate.h"
+#include "Party.h"
 #include <vector>
 
 class Grouping;  // forward declaration
 
 struct Node {
-	enum class Party {
-		unknown = 0,
-		A,
-		B,
-	};
-
 	Coordinate m_coord;
-	Party m_party = Party::unknown;
+	Party const* m_party;
 	int m_population = 0;
-	std::vector<const Node*> m_adjacents;
-	const Grouping* m_grouping = NULL;
+	std::vector<Node const*> m_adjacents;
+	Grouping const* m_grouping = NULL;
 };

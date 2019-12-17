@@ -2,8 +2,28 @@
 #include <random>
 #include <iostream>
 
-Graph::Graph() {
-	initialize();
+Graph::Graph() 
+	: m_party_a("Alpha", "Alphas", 'a'), m_party_b("Beta", "Betas", 'b')
+{
+	// Random number generators
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> d_party(0, 1);
+	std::discrete_distribution<> d_pop({ 6, 3, 1 });
+
+	// For every node
+	for (int y = 0; y < nodes.size(); ++y) {
+		for (int x = 0; x < nodes[0].size(); ++x) {
+			Node& n = nodes[y][x];
+			// Set initial values
+			n.m_coord = Coordinate(x, y);
+			set_adjacency_list(n);
+			// roll party
+			n.m_party = d_party(gen) == 0 ? &m_party_a : &m_party_b;
+			// roll population
+			n.m_population = d_pop(gen) + 1;
+		}
+	}
 }
 
 const Node* Graph::get_node(const Coordinate& coord) const {
@@ -38,48 +58,53 @@ bool Graph::is_complete() const {
 	return true;
 }
 
-std::map<Node::Party, int> Graph::survey_voters() const {
-	// Get the votes for each party from the initial population
-	std::map<Node::Party, int> voters;
+Results Graph::get_popular_results() const {
+	// Tally all votes from the initial population
+	std::unordered_map<Party const*, int> votes;
 
 	// for every node
 	for (int y = 0; y < nodes.size(); ++y) {
 		for (int x = 0; x < nodes[0].size(); ++x) {
 			const Node& n = nodes[y][x];
-			voters[n.m_party] += n.m_population;
+			votes[n.m_party] += n.m_population;
 		}
 	}
-	return voters;
+	return Results(votes);
 }
 
-std::map<Node::Party, int> Graph::get_votes() const {
-	// tally votes
-	std::map<Node::Party, int> votes;
+Results Graph::get_results() const {
+	// Random number generator
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> tiebreaker(0, 1);
+
+	// Tally votes from groupings
+	std::unordered_map<Party const*, int> votes;
 	for (const auto& g : groupings) {
-		Node::Party winner = g->get_winner();
+		Results r = g->get_results();
+		Party const* winner = r.get_winner();
 
-		// resolve any ties
-		if (winner == Node::Party::unknown) {
-			std::minstd_rand rando;
-			rando.seed((int)&g);  // use address of grouping as rand seed
-			winner = static_cast<Node::Party>(rando() % 2 + 1);
-			if (winner == Node::Party::A) {
-				std::cout << "[i] Swing district has voted for Party 'A'." << std::endl;
-			}
-			else {
-				std::cout << "[i] Swing district has voted for Party 'B'." << std::endl;
-			}
+		if (winner) {
+			votes[winner] += 1;
 		}
-
-		votes[winner] += 1;
+		else {
+			// resolve any ties
+			Party const* tie_winner = tiebreaker(gen) == 0 ? &m_party_a : &m_party_b;
+			std::cout << "[i] Swing district has swung to " << tie_winner->m_name_plural << "!" << std::endl;
+			votes[tie_winner] += 1;
+		}
 	}
-	return votes;
+	return Results(votes);
 }
 
-Node::Party Graph::get_winner() const {
-	// warning: will retally votes
-	std::map<Node::Party, int> votes = get_votes();
-	return Graph::get_winner(votes);
+const Party * Graph::get_party_a() const
+{
+	return &m_party_a;
+}
+
+const Party * Graph::get_party_b() const
+{
+	return &m_party_b;
 }
 
 void Graph::print() const {
@@ -128,23 +153,29 @@ void Graph::print() const {
 }
 
 std::vector<std::string> Graph::print_node(const Node& n) const {
+	/*
 	std::map<Node::Party, std::string> party = {
 		{Node::Party::A, " ... "},
 		{Node::Party::B, " ~~~ "},
 		{Node::Party::unknown, "     "},
-
-	};
+	};*/
 	std::string middle_ln;
 	std::string filler_ln;
 	{
 		if (n.m_grouping == NULL) {
 			middle_ln = "  " + std::to_string(n.m_population) + "  ";
-			filler_ln = party[n.m_party];
+			filler_ln = " " + std::string(3, n.m_party->m_ascii) + " ";
 		}
 		else {
-			const Node::Party& w = n.m_grouping->get_winner();
-			middle_ln = party[w];
-			filler_ln = party[Node::Party::unknown];
+			const Party* w = n.m_grouping->get_results().get_winner();
+			if (w) {
+				middle_ln = " " + std::string(3, w->m_ascii) + " ";
+			}
+			else {
+				// tie
+				middle_ln = " " + std::string(3, '?') + " ";
+			}
+			filler_ln = std::string(5, ' ');
 		}
 		// add suffix
 		bool connected = false;
@@ -238,29 +269,19 @@ void Graph::input_selection(const std::vector<Coordinate>& coords) {
 void Graph::print_selection_results(const bool& success) {
 	if (success) {
 		// display info on new grouping
-		std::weak_ptr<const Grouping> weak_group = groupings.back();
-		std::shared_ptr<const Grouping> group = weak_group.lock();
+		std::weak_ptr<Grouping const> weak_group = groupings.back();
+		std::shared_ptr<Grouping const> group = weak_group.lock();
 		if (group) {
-			int p = group->get_population();
-			std::map<Node::Party, int> votes = group->get_votes();
-			Node::Party winner = Grouping::get_winner(votes);
+			Results r = group->get_results();
+			Party const* winner = r.get_winner();
 
-			if (winner == Node::Party::A) {
-				std::cout <<
-					"[!] District created! Party A wins the district, "
-					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
-			}
-			else if (winner == Node::Party::B) {
-				std::cout <<
-					"[!] District created! Party B wins the district, "
-					<< votes[Node::Party::B] << " to " << votes[Node::Party::A];
+			if (winner) {
+				std::cout << "[!] District created! " << winner->m_name_plural << " win, "
+					<< r.get_result(winner) << " out of " << r.get_total() << " votes." << std::endl;
 			}
 			else {
-				std::cout <<
-					"[!] Swing district created! Polling is tied, "
-					<< votes[Node::Party::A] << " to " << votes[Node::Party::B];
+				std::cout << "[!] Swing district created! Polling is tied." << std::endl;
 			}
-			std::cout << std::endl;
 		}
 	}
 	else {
@@ -309,39 +330,6 @@ std::vector<std::vector<const Node*>> Graph::get_selections() const {
 	}
 
 	return components;
-}
-
-void Graph::initialize() {
-	// Random number generators
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> d_party(1, 2);
-	std::discrete_distribution<> d_pop({ 6, 3, 1 });
-
-	// For every node
-	for (int y = 0; y < nodes.size(); ++y) {
-		for (int x = 0; x < nodes[0].size(); ++x) {
-			Node& n = nodes[y][x];
-			// Set initial values
-			n.m_coord = Coordinate(x, y);
-			set_adjacency_list(n);
-			// roll party
-			n.m_party = static_cast<Node::Party>(d_party(gen));
-			// roll population
-			n.m_population = d_pop(gen) + 1;
-		}
-	}
-}
-
-// static
-Node::Party Graph::get_winner(std::map<Node::Party, int>& votes) {
-	// determine winner from votes. ties impossible
-	if (votes[Node::Party::A] > votes[Node::Party::B]) {
-		return Node::Party::A;
-	}
-	else {
-		return Node::Party::B;
-	}
 }
 
 void Graph::set_adjacency_list(Node& n) {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -119,6 +119,7 @@
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Grouping.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Results.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
@@ -126,6 +127,8 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Grouping.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="Party.h" />
+    <ClInclude Include="Results.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
