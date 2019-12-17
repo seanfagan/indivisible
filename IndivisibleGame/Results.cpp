@@ -1,11 +1,15 @@
 #include "Results.h"
 
-Results::Results(const std::unordered_map<Party const*, int>& results)
+// Constructors
+Results::Results(std::unordered_map<Party const*, int> const& results)
 	: m_results(results) {
-	// Use results to calculate total and winner.
+	/** Use results to calculate total and winner. */
 	int max = 0;
+
 	for (std::pair<Party const*, int> r : m_results) {
-		m_total += r.second;  // tally total
+		// Tally total
+		m_total += r.second;
+
 		// Is this the winner?
 		if (r.second > max) {
 			m_winner = r.first;  // new winner
@@ -17,9 +21,10 @@ Results::Results(const std::unordered_map<Party const*, int>& results)
 	}
 }
 
-Party const* Results::get_winner() const
+// Methods
+int Results::get_result(Party const* party) const
 {
-	return m_winner;
+	return m_results.at(party);
 }
 
 int Results::get_total() const
@@ -27,10 +32,7 @@ int Results::get_total() const
 	return m_total;
 }
 
-int Results::get_result(Party const* party) const
+Party const* Results::get_winner() const
 {
-	int hella = 1;
-	hella = m_results.at(party);
-	hella = 999;
-	return m_results.at(party);
+	return m_winner;
 }
