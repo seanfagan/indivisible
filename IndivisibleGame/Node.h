@@ -6,6 +6,7 @@ class Grouping;  // forward declaration
 class Party; // forward declaration
 
 struct Node {
+	// Vars
 	Coordinate m_coord;
 	Party const* m_party;
 	int m_population = 0;
