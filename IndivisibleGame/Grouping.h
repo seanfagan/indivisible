@@ -5,12 +5,14 @@
 
 class Grouping {
 public:
+	// Constructors
 	Grouping();
-	Grouping(std::vector<Node*> nodes);
 	~Grouping();
 
+	// Methods
 	void add_nodes(std::vector<Node*> nodes);
 	Results get_results() const;
 private:
+	// Vars
 	std::vector<Node*> m_nodes;
 };

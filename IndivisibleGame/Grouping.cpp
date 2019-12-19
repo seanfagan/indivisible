@@ -3,11 +3,6 @@
 
 Grouping::Grouping() {};
 
-Grouping::Grouping(std::vector<Node*> nodes)
-	: m_nodes(nodes) {
-	add_nodes(nodes);
-}
-
 Grouping::~Grouping() {
 	// Clear each nodes' grouping property.
 	for (auto& n : m_nodes) {
