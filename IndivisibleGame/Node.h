@@ -1,9 +1,9 @@
 #pragma once
 #include "Coordinate.h"
-#include "Party.h"
 #include <vector>
 
 class Grouping;  // forward declaration
+class Party; // forward declaration
 
 struct Node {
 	Coordinate m_coord;

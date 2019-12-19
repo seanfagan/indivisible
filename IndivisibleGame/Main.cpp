@@ -1,21 +1,12 @@
-#include "Coordinate.h"
-#include "Board.h"
 #include "Graph.h"
-#include "Results.h"
 
-#include <algorithm>
-#include <array>
-#include <cctype>
-#include <iostream>
-#include <random>
-#include <regex>
-#include <sstream>
-#include <string>
-#include <tuple>
-#include <vector>
-
-#define SIZE 5
-using adjboard = std::array<std::array<std::vector<Coordinate>, SIZE>, SIZE>;
+#include <algorithm>  // transform
+#include <cctype>  // isalnum
+#include <iostream>  // cout
+#include <regex>  // regex_match
+#include <sstream>  // getline
+#include <string>  // string
+#include <vector>  // vector
 
 /** User input */
 bool is_invalid_char(const char& ch)
@@ -68,21 +59,10 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 
 int main()
 {
-	// todo: flyweight pattern parties
-	// todo: commands pattern interface
+	// todo: separate IO (commands?)
 	// todo: points system
 	// todo: cleanup main.cpp
 	std::string play = "Y";
-
-	/*
-	Party a;
-	Party b;
-	std::unordered_map<Party*, int> ress;
-	ress[&a] = 5;
-	ress[&b] = 7;
-	Results abbba = Results(ress);
-	std::cout << "yesting";
-	*/
 
 	while (play == "Y" || play == "y") {
 		// create graph

@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
+#include <tuple>
 
 
 struct Coordinate {
+	// Vars
 	int x, y;
 
 	// Constructors

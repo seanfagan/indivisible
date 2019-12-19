@@ -1,6 +1,6 @@
 #pragma once
-#include <unordered_map>
 #include "Party.h"
+#include <unordered_map>
 
 class Results {
 public:

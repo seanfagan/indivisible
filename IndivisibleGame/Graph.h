@@ -1,7 +1,7 @@
 #pragma once
 #include "Board.h"
-#include "Node.h"
 #include "Grouping.h"
+#include "Node.h"
 #include "Results.h"
 #include <array>
 #include <memory>

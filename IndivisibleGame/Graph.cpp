@@ -1,6 +1,7 @@
 #include "Graph.h"
+#include <iostream>  // todo: remove dependency
 #include <random>
-#include <iostream>
+#include <unordered_map>
 
 Graph::Graph() 
 	: m_party_a("Alpha", "Alphas", 'a'), m_party_b("Beta", "Betas", 'b')
@@ -153,12 +154,6 @@ void Graph::print() const {
 }
 
 std::vector<std::string> Graph::print_node(const Node& n) const {
-	/*
-	std::map<Node::Party, std::string> party = {
-		{Node::Party::A, " ... "},
-		{Node::Party::B, " ~~~ "},
-		{Node::Party::unknown, "     "},
-	};*/
 	std::string middle_ln;
 	std::string filler_ln;
 	{

@@ -1,7 +1,6 @@
 #pragma once
 #include "Node.h"
 #include "Results.h"
-#include <map>
 #include <vector>
 
 class Grouping {

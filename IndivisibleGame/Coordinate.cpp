@@ -1,5 +1,4 @@
 #include "Coordinate.h"
-#include <tuple>
 
 // Constructors
 Coordinate::Coordinate()
