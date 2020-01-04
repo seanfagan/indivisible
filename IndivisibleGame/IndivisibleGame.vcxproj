@@ -119,15 +119,19 @@
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Grouping.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Printer.cpp" />
     <ClCompile Include="Results.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="Coordinate.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="Events.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Grouping.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Party.h" />
+    <ClInclude Include="Printer.h" />
     <ClInclude Include="Results.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

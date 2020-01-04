@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include "Printer.h"
 
 #include <algorithm>  // transform
 #include <cctype>  // isalnum
@@ -57,6 +58,9 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 	return result;
 }
 
+void global_on_event(Event& e) {
+}
+
 int main()
 {
 	// todo: separate IO (commands?)
@@ -64,9 +68,14 @@ int main()
 	// todo: cleanup main.cpp
 	std::string play = "Y";
 
+	Printer game_printer = Printer();
+	EventRegistry game_events = EventRegistry();
+	game_events.m_listeners.push_back(&game_printer);
+
 	while (play == "Y" || play == "y") {
 		// create graph
 		Graph g;
+		g.m_event_registry = game_events;
 		Party const* party_a = g.get_party_a();
 		Party const* party_b = g.get_party_b();
 
@@ -77,13 +86,14 @@ int main()
 		Party const* underdog = pop_a <= pop_b ? party_a : party_b;
 
 		// print details
-		std::cout << "[i] " << party_a->m_name_plural << " has " << pop_a << " supporters. "
-			<< party_b->m_name_plural << " has " << pop_b << " supporters." << std::endl;
+		std::cout << "[i] " << party_a->m_name_plural << " have " << pop_a << " supporters. "
+			<< party_b->m_name_plural << " have " << pop_b << " supporters." << std::endl;
 		std::cout << "[!] Divide the people so that " << underdog->m_name_plural << " win!" << std::endl;
 		std::cout << std::endl;
 
 		while (!g.is_complete()) {
-			g.print();
+			// g.print();
+			game_printer.print(g);
 
 			// prompt: get input
 			std::cout << "   +--= Input your selection =--+" << std::endl;

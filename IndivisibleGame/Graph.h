@@ -3,9 +3,13 @@
 #include "Grouping.h"
 #include "Node.h"
 #include "Results.h"
+#include "Event.h"
+#include "Events.h"
+
 #include <array>
 #include <memory>
 #include <vector>
+#include <functional>
 #define SIZE 5 // todo
 
 class Graph {
@@ -15,6 +19,7 @@ public:
 	void input_selection(std::vector<Coordinate> const& coords);
 	void undo_grouping();
 	void clear_groupings();
+	std::array<std::array<Node const*, SIZE>, SIZE> get_nodes() const;
 	Node const* get_node(Coordinate const& coord) const;
 	Node const* get_node(int const& x, int const& y) const;
 	std::vector<std::weak_ptr<Grouping const>> get_groupings() const;
@@ -24,7 +29,8 @@ public:
 	Results get_results() const;
 	Party const* get_party_a() const;
 	Party const* get_party_b() const;
-	void print() const;  // debug
+
+	EventRegistry m_event_registry;
 
 private:
 	std::array<std::array<Node, SIZE>, SIZE> nodes;
@@ -35,6 +41,4 @@ private:
 
 	void set_adjacency_list(Node& n);
 	void dfs_selections(Node const* node, Board<bool>& visited, std::vector<Node const*>& connected) const;
-	std::vector<std::string> print_node(Node const& n) const;
-	void print_selection_results(bool const& success);
 };

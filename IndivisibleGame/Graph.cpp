@@ -1,10 +1,11 @@
 #include "Graph.h"
+
 #include <iostream>  // todo: remove dependency
 #include <random>
 #include <unordered_map>
 
 Graph::Graph() 
-	: m_party_a("Alpha", "Alphas", 'a'), m_party_b("Beta", "Betas", 'b')
+	: m_party_a("Alpha", "Alphas", 'i'), m_party_b("Beta", "Betas", '.')
 {
 	// Random number generators
 	std::random_device rd;
@@ -91,8 +92,9 @@ Results Graph::get_results() const {
 		else {
 			// resolve any ties
 			Party const* tie_winner = tiebreaker(gen) == 0 ? &m_party_a : &m_party_b;
-			std::cout << "[i] Swing district has swung to " << tie_winner->m_name_plural << "!" << std::endl;
 			votes[tie_winner] += 1;
+			TieBrokenEvent evt = TieBrokenEvent(tie_winner);
+			m_event_registry.process_event(evt);
 		}
 	}
 	return Results(votes);
@@ -106,98 +108,6 @@ const Party * Graph::get_party_a() const
 const Party * Graph::get_party_b() const
 {
 	return &m_party_b;
-}
-
-void Graph::print() const {
-	// top line
-	std::cout << "   ";
-	for (int i = 0; i < nodes.size(); ++i) {
-		std::cout << "+-----";
-	}
-	std::cout << "+" << std::endl;
-
-	// iterate through node rows in reverse (max to min)
-	for (int row = nodes.size() - 1; row >= 0; --row) {
-		// construct this row's lines of text, node by node
-		std::vector<std::string> row_lines(4);
-		for (int col = 0; col < nodes.size(); ++col) {
-			const Node& n = nodes[row][col];
-			std::vector<std::string> node_lines = print_node(n);
-			for (int i = 0; i < node_lines.size(); ++i) {
-				row_lines[i] += node_lines[i];
-			}
-		}
-
-		// print row, line by line
-		for (int i = 0; i < row_lines.size(); ++i) {
-			// print prefix
-			switch (i) {
-				case 1:
-					std::cout << std::to_string(row + 1) + "  |";
-					break;
-				case 3:
-					std::cout << "   +";
-					break;
-				default: std::cout << "   |";
-			}
-			std::cout << row_lines[i] << std::endl;  // print line
-		}
-	}
-
-	// bottom line
-	std::cout << "    ";
-	for (int i = 0; i < nodes.size(); i++) {
-		char index = 'A' + i;
-		std::cout << "  " << std::string{ index } + "   ";
-	}
-	std::cout << std::endl;
-}
-
-std::vector<std::string> Graph::print_node(const Node& n) const {
-	std::string middle_ln;
-	std::string filler_ln;
-	{
-		if (n.m_grouping == NULL) {
-			middle_ln = "  " + std::to_string(n.m_population) + "  ";
-			filler_ln = " " + std::string(3, n.m_party->m_ascii) + " ";
-		}
-		else {
-			const Party* w = n.m_grouping->get_results().get_winner();
-			if (w) {
-				middle_ln = " " + std::string(3, w->m_ascii) + " ";
-			}
-			else {
-				// tie
-				middle_ln = " " + std::string(3, '?') + " ";
-			}
-			filler_ln = std::string(5, ' ');
-		}
-		// add suffix
-		bool connected = false;
-		for (auto& neigh : n.m_adjacents) {
-			// find eastern neighbor
-			if (neigh->m_coord.x > n.m_coord.x) {
-				connected = (neigh->m_grouping == n.m_grouping);
-			}
-		}
-		middle_ln += (connected ? " " : "|");
-		filler_ln += (connected ? " " : "|");
-	}
-	std::string bottom_ln;
-	{
-		// print the separators
-		bool connected = false;
-		for (auto& neigh : n.m_adjacents) {
-			// find vertical neighbor
-			if (neigh->m_coord.y < n.m_coord.y) {
-				connected = (neigh->m_grouping == n.m_grouping);
-			}
-		}
-		bottom_ln = (connected ? "     " : "-----");
-		bottom_ln += "+";
-	}
-	std::vector<std::string> lines{ filler_ln, middle_ln, filler_ln, bottom_ln };
-	return lines;
 }
 
 void Graph::input_selection(const std::vector<Coordinate>& coords) {
@@ -256,53 +166,50 @@ void Graph::input_selection(const std::vector<Coordinate>& coords) {
 		// To save the new Grouping, push a shared pointer of it to the Graph.
 		// The grouping will exist so long as at least one shared pointer exists.
 		groupings.push_back(new_grouping);
-	}
-
-	print_selection_results(valid);
-}
-
-void Graph::print_selection_results(const bool& success) {
-	if (success) {
-		// display info on new grouping
-		std::weak_ptr<Grouping const> weak_group = groupings.back();
-		std::shared_ptr<Grouping const> group = weak_group.lock();
-		if (group) {
-			Results r = group->get_results();
-			Party const* winner = r.get_winner();
-
-			if (winner) {
-				std::cout << "[!] District created! " << winner->m_name_plural << " win, "
-					<< r.get_result(winner) << " out of " << r.get_total() << " votes." << std::endl;
-			}
-			else {
-				std::cout << "[!] Swing district created! Polling is tied." << std::endl;
-			}
-		}
+		GroupingSucceededEvent evt = GroupingSucceededEvent(new_grouping);
+		m_event_registry.process_event(evt);
 	}
 	else {
-		// failed to apply selection
-		std::cout << "[x] Your selection was not applied." << std::endl;
+		GroupingFailedEvent evt = GroupingFailedEvent();
+		m_event_registry.process_event(evt);
 	}
 }
 
 void Graph::undo_grouping() {
 	if (groupings.empty()) {
-		std::cout << "[i] Nothing to undo my friend." << std::endl;
+		// nothing to undo
+		GroupingUndoFailedEvent evt = GroupingUndoFailedEvent();
+		m_event_registry.process_event(evt);
 	}
 	else {
-		groupings.pop_back();
-		std::cout << "[i] Last grouping undone." << std::endl;
+		groupings.pop_back(); // undo last grouping
+		GroupingUndoSucceededEvent evt = GroupingUndoSucceededEvent();
+		m_event_registry.process_event(evt);
 	}
 }
 
 void Graph::clear_groupings() {
 	if (groupings.empty()) {
-		std::cout << "[i] Nothing to reset." << std::endl;
+		// nothing to clear
+		GroupingClearFailedEvent evt = GroupingClearFailedEvent();
+		m_event_registry.process_event(evt);
 	}
 	else {
-		groupings.clear();
-		std::cout << "[i] All groupings cleared." << std::endl;
+		groupings.clear(); // clear all groupings
+		GroupingClearSucceededEvent evt = GroupingClearSucceededEvent();
+		m_event_registry.process_event(evt);
 	}
+}
+
+std::array<std::array<Node const*, SIZE>, SIZE> Graph::get_nodes() const
+{
+	std::array<std::array<Node const*, SIZE>, SIZE> arr;
+	for (int y = 0; y < nodes.size(); ++y) {
+		for (int x = 0; x < nodes[0].size(); ++x) {
+			arr[y][x] = get_node(x, y);
+		}
+	}
+	return arr;
 }
 
 std::vector<std::vector<const Node*>> Graph::get_selections() const {
