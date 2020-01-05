@@ -6,7 +6,7 @@ enum class EventType {
 	GroupingSucceeded, GroupingFailed,
 	GroupingUndoSucceeded, GroupingUndoFailed,
 	GroupingClearSucceeded, GroupingClearFailed,
-	TieBroken,
+	TieBroken, GroupingInputError,
 	// InputErrOutOfBounds, InputErrAlreadySelected, InputErrPocket, InputErrSize,
 };
 

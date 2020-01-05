@@ -76,3 +76,17 @@ public:
 private:
 	Party const* m_winner;
 };
+
+class GroupingInputErrorEvent : public Event {
+public:
+	GroupingInputErrorEvent(std::string& reason)
+		: m_reason(reason) {}
+
+	inline std::string get_reason() const { return m_reason; }
+
+	virtual EventType get_event_type() const override {
+		return EventType::GroupingInputError;
+	}
+private:
+	std::string m_reason;
+};

@@ -81,6 +81,9 @@ void Printer::on_event(Event& e) {
 	case EventType::TieBroken:
 		on_tie_broken(static_cast<TieBrokenEvent&>(e));
 		break;
+	case EventType::GroupingInputError:
+		on_grouping_input_error(static_cast<GroupingInputErrorEvent&>(e));
+		break;
 	default:
 		break;
 	}
@@ -183,5 +186,11 @@ bool Printer::on_grouping_clear_failed(GroupingClearFailedEvent& e) const {
 bool Printer::on_tie_broken(TieBrokenEvent& e) const {
 	auto tie_winner = e.get_winner();
 	std::cout << "[i] Swing district has swung to " << tie_winner->m_name_plural << "!" << std::endl;
+	return true;
+}
+
+bool Printer::on_grouping_input_error(GroupingInputErrorEvent& e) const {
+	std::string reason = e.get_reason();
+	std::cout << "[x] Illegal! " << reason << std::endl;
 	return true;
 }

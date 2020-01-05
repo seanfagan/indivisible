@@ -23,4 +23,5 @@ private:
 	bool on_grouping_clear_succeeded(GroupingClearSucceededEvent& e) const;
 	bool on_grouping_clear_failed(GroupingClearFailedEvent& e) const;
 	bool on_tie_broken(TieBrokenEvent& e) const;
+	bool on_grouping_input_error(GroupingInputErrorEvent& e) const;
 };
