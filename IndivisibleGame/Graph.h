@@ -39,6 +39,7 @@ private:
 	Party m_party_a;
 	Party m_party_b;
 
+	bool validate_selection(const std::vector<Coordinate>& coords, std::shared_ptr<Grouping>& new_grouping);
 	void set_adjacency_list(Node& n);
 	void dfs_selections(Node const* node, Board<bool>& visited, std::vector<Node const*>& connected) const;
 };
