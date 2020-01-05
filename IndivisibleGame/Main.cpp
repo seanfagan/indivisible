@@ -37,10 +37,14 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 	{
 		// separate a substring
 		std::string substr;
-		std::getline(ss, substr, ','); // comma delimiter
+		std::getline(ss, substr, ' '); // space delimiter
 
 		// strip out invalid characters
 		substr.erase(std::remove_if(substr.begin(), substr.end(), is_invalid_char), substr.end());
+
+		if (substr == "") {
+			continue; // skip blanks
+		}
 
 		// convert to uppercase
 		std::transform(substr.begin(), substr.end(), substr.begin(), ::toupper);
@@ -58,14 +62,11 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 	return result;
 }
 
-void global_on_event(Event& e) {
-}
-
 int main()
 {
-	// todo: separate IO (commands?)
-	// todo: points system
-	// todo: cleanup main.cpp
+	// todo: separate Input (commands?)
+	// todo: points system?
+	// todo: cleanup and document
 	std::string play = "Y";
 
 	Printer game_printer = Printer();
