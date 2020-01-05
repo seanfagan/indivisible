@@ -1,6 +1,5 @@
 #include "Graph.h"
 
-#include <iostream>  // todo: remove dependency
 #include <random>
 #include <unordered_map>
 
