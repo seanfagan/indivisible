@@ -3,7 +3,7 @@
 #include <vector>
 
 class Grouping;  // forward declaration
-class Party; // forward declaration
+struct Party; // forward declaration
 
 struct Node {
 	// Vars
