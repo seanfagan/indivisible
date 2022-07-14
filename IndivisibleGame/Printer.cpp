@@ -144,8 +144,10 @@ bool Printer::on_grouping_succeeded(GroupingSucceededEvent& e) const {
 		Party const* winner = r.get_winner();
 
 		if (winner) {
+			int winner_votes = r.get_result(winner);
+			int loser_votes = r.get_total() - winner_votes;
 			std::cout << "[!] District created! " << winner->m_name_plural << " win, "
-				<< r.get_result(winner) << " out of " << r.get_total() << " votes." << std::endl;
+				<< winner_votes << " to " << loser_votes << " votes." << std::endl;
 		}
 		else {
 			std::cout << "[!] Swing district created! Polling is tied." << std::endl;

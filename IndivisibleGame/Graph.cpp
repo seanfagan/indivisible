@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 Graph::Graph() 
-	: m_party_a("Alpha", "Alphas", 'i'), m_party_b("Beta", "Betas", '.')
+	: m_party_a("Equis", "Equises", 'x'), m_party_b("Terminal", "Terminals", '.')
 {
 	// Random number generators
 	std::random_device rd;
