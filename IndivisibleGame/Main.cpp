@@ -64,9 +64,11 @@ std::vector<Coordinate> parse_selection(const std::string& input)
 
 int main()
 {
+	// todo: support 3x3 boards
+	// todo: GameMode class
+	// todo: separate Party from Graph
 	// todo: separate Input (commands?)
-	// todo: points system?
-	// todo: cleanup and document
+	// todo: document
 	std::string play = "Y";
 
 	Printer game_printer = Printer();
